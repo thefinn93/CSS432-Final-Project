@@ -4,79 +4,60 @@ import json
 import logging
 
 class RPSServerHandler(SocketServer.BaseRequestHandler):
-    """
-    The RequestHandler class for our server.
 
-    It is instantiated once per connection to the server, and must
-    override the handle() method to implement communication to the
-    client.
-    """
 
     def handle(self):
         self.logInfo = {"clientIP": self.client_address[0], "clientName": "-"}
+        self.currentGame = None
+        self.clientId = None
         logging.info("new connection!", extra=self.logInfo)
-        # self.request is the TCP socket connected to the client
-        registered = False
-        while not registered:
-            logging.info("Attempting to register", extra=self.logInfo)
-            self.data = self.request.recv(1024).strip()
-            logging.debug("Got message: %s", self.data, extra=self.logInfo)
+
+        disconnectRequest = False
+        while not disconnectRequest:
+            data = self.request.recv(1024).strip()
+            logging.debug("Got message: %s", data, extra=self.logInfo)
             try:
-                message = json.loads(self.data)
+                message = json.loads(data)
                 if "action" in message:
                     if message['action'] == "register":
-                        if "name" in message:
-                            if len(message['name']) < 21:
-                                if not message['name'] in clients:
-                                    self.logInfo['clientName'] = message['name']
-                                    self.clientid = message['name']
-                                    logging.info("Name is valid! Registration succssful", extra=self.logInfo)
-                                    clients[self.clientid] = {}
-                                    registered = True
-                                    clients[self.clientid]['status'] = 0
-                                    logging.debug("Informing client registration was successful", extra=self.logInfo)
-                                    self.request.sendall(json.dumps({
-                                      "result": "success",
-                                      "clientid": self.clientid
-                                    }))
-                                else:
-                                    logging.info("Tried to take an in use name", extra=self.logInfo)
-                                    self.request.sendall(json.dumps({
-                                      "result": "error",
-                                      "excuse": "That name is in use."
-                                    }))
-                            else:
-                                logging.info("Tried to use an oversized name", extra=self.logInfo)
-                                self.request.sendall(json.dumps({
-                                  "result": "error",
-                                  "excuse": "That name is too long (max 20 characters)"
-                                }))
+                        self.register(message)
+                    elif message['action'] == "disconnect":
+                        disconnectRequest = True
+                        logging.info("Got disconnect request", extra=self.logInfo)
+                    elif self.clientId is not None:
+                        if message['action'] == "challange":
+                            challange(message)
                         else:
-                            logging.warning("Tried to register, but didnt specify a name!", extra=self.logInfo)
+                            logging.warning("Received request for unrecognized action %s",
+                              message['action'],
+                              extra=self.logInfo)
                             self.request.sendall(json.dumps({
                               "result": "error",
-                              "excuse": "Please specify a name"
+                              "excuse": "Unrecognized action"
                             }))
                     else:
-                        logging.warning("Tried to %s without first registering", message['action'], extra=self.logInfo)
+                        logging.warning("Tried to %s without first registering",
+                          message['action'],
+                          extra=self.logInfo)
                         self.request.sendall(json.dumps({
                           "result": "error",
                           "excuse": "Please register first"
                         }))
                 else:
-                    logging.warning("Made a request but did not specify an action", extra=self.logInfo)
+                    logging.warning("Made a request but did not specify an action",
+                      extra=self.logInfo)
                     self.request.sendall(json.dumps({
                       "result": "error",
                       "excuse": "No action specified"
-                    }))
+                }))
             except ValueError:
-                logging.warning("Invalid JSON received: %s", self.data, extra=self.logInfo)
+                logging.warning("Invalid JSON received: %s", data,
+                  extra=self.logInfo)
                 self.request.sendall(json.dumps(
                   {
                     "result":"error",
                     "excuse": "Unreadable message, please try again."
                   }))
-        logging.info("Successfully registered, but actual gameplay has not yet been coded!! OH NOEZ!", extra=self.logInfo)
 
     def finish(self):
         logging.info("Disconnecting...", extra=self.logInfo)
@@ -84,6 +65,48 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
             clients.pop(self.clientid)
         except AttributeError:
             pass
+
+    def register(self, message):
+        logging.info("Attempting to register...", extra=self.logInfo)
+        if "name" in message:
+            if len(message['name']) < 21:
+                if not message['name'] in clients:
+                    self.logInfo['clientName'] = message['name']
+                    self.clientid = message['name']
+                    logging.info("Name is valid! Registration succssful", extra=self.logInfo)
+                    clients[self.clientid] = {}
+                    clients[self.clientid]['status'] = 0
+                    logging.debug("Informing client registration was successful", extra=self.logInfo)
+                    self.request.sendall(json.dumps({
+                      "result": "success",
+                      "clientid": self.clientid
+                    }))
+                else:
+                    logging.info("Tried to take an in use name", extra=self.logInfo)
+                    self.request.sendall(json.dumps({
+                      "result": "error",
+                      "excuse": "That name is in use."
+                    }))
+            else:
+                logging.info("Tried to use an oversized name", extra=self.logInfo)
+                self.request.sendall(json.dumps({
+                  "result": "error",
+                  "excuse": "That name is too long (max 20 characters)"
+                }))
+        else:
+            logging.warning("Tried to register, but didnt specify a name!", extra=self.logInfo)
+            self.request.sendall(json.dumps({
+              "result": "error",
+              "excuse": "Please specify a name"
+            }))
+    def challange(self, message):
+        logging.warning("Shit shit I don't know how to do this thing!",
+          extra=self.logInfo)
+        self.request.sendall(json.dumps({
+          "result": "error",
+          "excuse": "Shit shit I don't know how to do this thing!"
+        }))
+
 
 
 
