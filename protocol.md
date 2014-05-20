@@ -67,6 +67,5 @@ message:
     "action": "list"
     "clientid": "[id]"
 }
-
-Where `[id]` is the client id received during registration.
 ```
+Where `[id]` is the client id received during registration.
