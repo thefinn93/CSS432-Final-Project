@@ -3,15 +3,15 @@ The following strings are the expected commands that either the client and/or
 the server is exppecting. They are grouped by which function the client first
 uses the call. Each command is a JSON object.
 
-## 1. Register Commands
-These are the commands that are used during the registration process.
+## 1. Register Messages
+These are the messages that are used during the registration process.
 
-### Client Sent commands
-These are commands that the client sends to the server.
+### Client Messages
+These are messages that the client sends to the server.
 
 #### Register Username
 To allow the user to pick a personalized username, the client sends the
-following command to the server:
+following message to the server:
 
 ```json
 {
@@ -20,10 +20,10 @@ following command to the server:
 }
 ```
 Where `[username]` is a name that the user has specified.
-### Server Sent commands
-These are the commands that the server sends to the client. The server takes
+### Server Messages
+These are the messages that the server sends to the client. The server takes
 the username received and checks the current list of registered names then
-sends back one of the following commands:
+sends back one of the following messages:
 
 #### Success
 If the name is found to be valid to the server, it sends the following succes
