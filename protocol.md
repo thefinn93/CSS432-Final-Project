@@ -10,6 +10,8 @@ These are the commands that are used during the registration process.
 These are commands that the client sends to the server.
 
 #### Register Username
+To allow the user to pick a personalized username, the client sends the
+following command to the server:
 
 ```json
 {
@@ -19,4 +21,31 @@ These are commands that the client sends to the server.
 ```
 Where `[username]` is a name that the user has specified.
 ### Server Sent commands
-These are the commands that the server sends to the client.
+These are the commands that the server sends to the client. The server takes
+the username received and checks the current list of registered names then
+sends back one of the following commands:
+
+#### Success
+If the name is found to be valid to the server, it sends the following succes
+message:
+
+```json
+{
+    "result": "success"
+    "clientid": "[id]"
+}
+````
+Where `[id]` is the client's unique identification, which should be sent with
+every subsequent message to the server.
+
+#### Error
+If the name is not found to be vailid with the server, it sends back one of the
+following messages:
+
+````json
+{
+    "result": "error"
+    "excuse": "[message]"
+}
+````
+Where `[message]` is the description of the error. `"excuse"` is optional.
