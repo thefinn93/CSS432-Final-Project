@@ -35,8 +35,7 @@ message:
     "clientid": "[id]"
 }
 ````
-Where `[id]` is the client's unique identification, which should be sent with
-every subsequent message to the server.
+Where `[id]` is the client unique identifier.
 
 #### Error
 If the name is not found to be vailid with the server, it sends back one of the
@@ -65,7 +64,38 @@ message:
 ```json
 {
     "action": "list"
-    "clientid": "[id]"
 }
 ```
-Where `[id]` is the client id received during registration.
+
+#### Create Game
+This message is sent to tell the server that they are activily looking for an
+opponent.
+
+```json
+{
+    "action": "create"
+}
+```
+
+#### Join Game
+This message is sent when the user would like to join a specific game.
+
+```json
+{
+    "action": "join"
+    "gameid": "[id]"
+}
+```
+Where `[id]` is the id of the game to be joined.
+
+#### Leave Server
+This message is used to gracefully leave the server.
+
+```json
+{
+    "action":"disconnect"
+    "clientid": "[username]"
+}
+```
+Where `[username]` is the username the user chose during registration. Do not
+allow this variable to be entered by the user directly.
