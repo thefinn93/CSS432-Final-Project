@@ -33,8 +33,8 @@ def register(sock):
                     else:
                         print "No clientid recieved. Weird, trying again..."
                 elif response["result"] == "error":
-                    if "message" in response:
-                        print "Failed to register: %s" % response['message']
+                    if "excuse" in response:
+                        print "Failed to register: %s" % response['excuse']
                     else:
                         print "Failed to register (unknown reason)"
                 else:
@@ -44,11 +44,7 @@ def register(sock):
     return clientid
 
 def disconnect(sock, clientid):
-    goodbyeMsg = json.dumps(
-        {
-            'client': clientid,
-            'action': 'disconnect'
-        })
+    goodbyeMsg = json.dumps({'client': clientid, 'action': 'disconnect'})
     sock.send(goodbyeMsg)
     sock.close()
 
