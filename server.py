@@ -155,4 +155,8 @@ if __name__ == "__main__":
     # Activate the server; this will keep running until you
     # interrupt the program with Ctrl-C
     print "Server is running. Press CTRL-C to stop. tailf server.log for extra fun technobabble"
-    server.serve_forever()
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print "\nOMG U PRESSED CTRL-C"
+        server.shutdown()
