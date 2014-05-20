@@ -82,7 +82,7 @@ This message is sent when the user would like to join a specific game.
 
 ```json
 {
-    "action": "join"
+    "action": "join",
     "gameid": "[id]"
 }
 ```
@@ -93,7 +93,7 @@ This message is used to gracefully leave the server.
 
 ```json
 {
-    "action":"disconnect"
+    "action":"disconnect",
     "clientid": "[username]"
 }
 ```
