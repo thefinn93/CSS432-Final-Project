@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import SocketServer
 import json
+import logging
 
 class RPSServerHandler(SocketServer.BaseRequestHandler):
     """
@@ -12,12 +13,14 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
     """
 
     def handle(self):
-        print "Got connecton from somewhere!"
+        self.logInfo = {"clientIP": self.client_address[0], "clientName": "-"}
+        logging.info("new connection!", extra=self.logInfo)
         # self.request is the TCP socket connected to the client
         registered = False
         while not registered:
-            print "Attempting to register"
+            logging.info("Attempting to register", extra=self.logInfo)
             self.data = self.request.recv(1024).strip()
+            logging.debug("Got message: %s", self.data, extra=self.logInfo)
             try:
                 message = json.loads(self.data)
                 if "action" in message:
@@ -25,41 +28,49 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
                         if "name" in message:
                             if len(message['name']) < 21:
                                 if not message['name'] in clients:
+                                    self.logInfo['clientName'] = message['name']
                                     self.clientid = message['name']
+                                    logging.info("Name is valid! Registration succssful", extra=self.logInfo)
                                     clients[self.clientid] = {}
                                     registered = True
                                     clients[self.clientid]['status'] = 0
+                                    logging.debug("Informing client registration was successful", extra=self.logInfo)
                                     self.request.sendall(json.dumps({
                                       "result": "success",
                                       "clientid": self.clientid
                                     }))
-                                    print "Registered as %s" % self.clientid
                                 else:
+                                    logging.info("Tried to take an in use name", extra=self.logInfo)
                                     self.request.sendall(json.dumps({
                                       "result": "error",
                                       "excuse": "That name is in use."
                                     }))
                             else:
+                                logging.info("Tried to use an oversized name", extra=self.logInfo)
                                 self.request.sendall(json.dumps({
                                   "result": "error",
                                   "excuse": "That name is too long (max 20 characters)"
                                 }))
                         else:
+                            logging.warning("Tried to register, but didnt specify a name!", extra=self.logInfo)
                             self.request.sendall(json.dumps({
                               "result": "error",
                               "excuse": "Please specify a name"
                             }))
                     else:
+                        logging.warning("Tried to %s without first registering", message['action'], extra=self.logInfo)
                         self.request.sendall(json.dumps({
                           "result": "error",
                           "excuse": "Please register first"
                         }))
                 else:
+                    logging.warning("Made a request but did not specify an action", extra=self.logInfo)
                     self.request.sendall(json.dumps({
                       "result": "error",
                       "excuse": "No action specified"
                     }))
             except ValueError:
+                logging.warning("Invalid JSON received: %s", self.data, extra=self.logInfo)
                 print "Received invalid JSON from client"
                 self.request.sendall(json.dumps(
                   {
@@ -71,12 +82,18 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
         print "There's really nothing else I know how to do yet :("
 
     def finish(self):
-        print "%s disconnected" % self.clientid
-        clients.pop(self.clientid)
+        logging.info("Disconnecting...", extra=self.logInfo)
+        try:
+            clients.pop(self.clientid)
+        except AttributeError:
+            pass
 
 
 
 if __name__ == "__main__":
+    logformat = "[%(asctime)s][%(levelname)s][%(clientIP)s][%(clientName)s] %(message)s"
+    # First, configure the logger to dump to server.log
+    logging.basicConfig(filename="server.log", level=logging.DEBUG, format=logformat)
     HOST, PORT = "localhost", 22066
     clients = {}
     server = SocketServer.TCPServer((HOST, PORT), RPSServerHandler)
