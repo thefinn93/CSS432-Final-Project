@@ -62,6 +62,17 @@ def disconnect(sock, clientid):
     sock.sendall(goodbyeMsg)
     sock.close()
 
+def pickOpponent(sock, clientid):
+    logging.info("Looking for opponents")
+    sock.sendall(json.dumps({'action':'list', 'clientid': clientid}))
+    response = json.loads(sock.recv(1024))
+    if "list" in response:
+        print "Name\tID\tScore"
+        for player in response['list']:
+            print "%s\t%s\t%s" % (player['name'], player['id'], player['score'])
+    else:
+        print response
+
 # Plays 1 game of rock paper scissors
 def playGame(sock, clientid):
     logging.warning("Attempting to play game I don't know how to play!")
@@ -75,7 +86,11 @@ if __name__ == "__main__":
     # Function to connect and authenticate with the server
     sock = connect('localhost', 22066)
 
+    # We don't really need to send this with each packet, do we....
     clientid = register(sock)
+
+    # List all other players
+    pickOpponent(sock, clientid)
 
     # Play until the user doesn't want to anymore
     donePlaying = False
