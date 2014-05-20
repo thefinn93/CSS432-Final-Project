@@ -25,15 +25,15 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
                         if "name" in message:
                             if len(message['name']) < 21:
                                 if not message['name'] in clients:
-                                    id = message['name']
-                                    clients[id] = {}
+                                    self.clientid = message['name']
+                                    clients[self.clientid] = {}
                                     registered = True
-                                    clients[id]['status'] = 0
+                                    clients[self.clientid]['status'] = 0
                                     self.request.sendall(json.dumps({
                                       "result": "success",
-                                      "clientid": id
+                                      "clientid": self.clientid
                                     }))
-                                    print "Registered as %s" % id
+                                    print "Registered as %s" % self.clientid
                                 else:
                                     self.request.sendall(json.dumps({
                                       "result": "error",
@@ -69,6 +69,11 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
         print "Clients:"
         print clients
         print "There's really nothing else I know how to do yet :("
+
+    def finish(self):
+        print "%s disconnected" % self.clientid
+        clients.pop(self.clientid)
+
 
 
 if __name__ == "__main__":
