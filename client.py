@@ -41,6 +41,7 @@ def register(sock):
                     print "Unrecognized result from server: %s" % response['result']
         except ValueError:
             print "Received unreadable message from the server :("
+            print rawresponse
     return clientid
 
 def disconnect(sock, clientid):
