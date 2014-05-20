@@ -42,10 +42,31 @@ every subsequent message to the server.
 If the name is not found to be vailid with the server, it sends back one of the
 following messages:
 
-````json
+```json
 {
     "result": "error",
     "excuse": "[message]"
 }
-````
+```
 Where `[message]` is the description of the error. `"excuse"` is optional.
+
+## 2. Menu Messages
+These are the messages for communication between the client and the server
+while interacting with the menu.
+
+### Client Messages
+The following messages are used by the client to interaction with the server
+during the menu phase.
+
+#### List Games
+To retrieve a list of possible opponents, the client sends the following
+message:
+
+```json
+{
+    "action": "list"
+    "clientid": "[id]"
+}
+
+Where `[id]` is the client id received during registration.
+```
