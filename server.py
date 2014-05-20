@@ -71,15 +71,12 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
                     }))
             except ValueError:
                 logging.warning("Invalid JSON received: %s", self.data, extra=self.logInfo)
-                print "Received invalid JSON from client"
                 self.request.sendall(json.dumps(
                   {
                     "result":"error",
                     "excuse": "Unreadable message, please try again."
                   }))
-        print "Clients:"
-        print clients
-        print "There's really nothing else I know how to do yet :("
+        logging.info("Successfully registered, but actual gameplay has not yet been coded!! OH NOEZ!", extra=self.logInfo)
 
     def finish(self):
         logging.info("Disconnecting...", extra=self.logInfo)
@@ -100,5 +97,5 @@ if __name__ == "__main__":
 
     # Activate the server; this will keep running until you
     # interrupt the program with Ctrl-C
-    print "Server is running. Press CTRL-C to stop."
+    print "Server is running. Press CTRL-C to stop. tailf server.log for extra fun technobabble"
     server.serve_forever()
