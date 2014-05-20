@@ -3,8 +3,9 @@ import socket
 import json
 
 def connect(hostname, port):
-    # For now, the server is hard coded
-    server = socket.getaddrinfo(hostname, port)
+    # Eventually, we should loop through all results and use the first one that
+    # works, but for now
+    server = socket.getaddrinfo(hostname, port)[0]
 
     # server[0] will have the socket family (ie INET or INET6)
     sock = socket.socket(server[0], socket.SOCK_STREAM)
@@ -31,7 +32,13 @@ def register(sock):
                         registered = True
                     else:
                         print "No clientid recieved. Weird, trying again..."
+                elif response["result"] == "error":
+                    if "message" in response:
+                        print "Failed to register: %s" % response['message']
+                    else:
+                        print "Failed to register (unknown reason)"
                 else:
+                    print "Unrecognized result from server: %s" % response['result']
         except ValueError:
             print "Received unreadable message from the server :("
     return clientid
@@ -48,7 +55,7 @@ def disconnect(sock, clientid):
 # Plays 1 game of rock paper scissors
 def playGame(sock, clientid):
      print "Sorry, I don't know how to play :("
-     return False
+     return True
 
 if __name__ == "__main__":
     # Function to connect and authenticate with the server
