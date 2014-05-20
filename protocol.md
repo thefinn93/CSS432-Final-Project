@@ -1,4 +1,4 @@
-# Rock Paper Scissors Network Protocol (RPSNP)
+# Rock Paper Scissors Network Protocol
 The following strings are the expected commands that either the client and/or
 the server is exppecting. They are grouped by which function the client first
 uses the call. Each command is a JSON object.
