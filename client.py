@@ -22,7 +22,7 @@ def register(sock):
         name = raw_input("Choose a name: ")
         print "Registering...."
         sock.send(json.dumps({"action": "register", "name": name}))
-        rawresponse = sock.makefile().readline()
+        rawresponse = sock.recv(1024).strip()
         try:
             response = json.loads(rawresponse)
             if "result" in response:
