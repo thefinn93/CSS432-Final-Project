@@ -12,7 +12,38 @@ def connect(hostname, port):
     # server[4] is a tuple in form (ip, port)
     sock.connect(server[4])
 
-    return (sock, 0)
+    return sock
+
+def register(sock):
+    registered = False
+    clientid = None
+    while not registered:
+        name = raw_input("Choose a name: ")
+        print "Registering...."
+        sock.send(json.dumps({"action": "register", "name": name}))
+        rawresponse = sock.makefile().readline()
+        try:
+            response = json.loads(rawresponse)
+            if "result" in response:
+                if response["result"] == "success":
+                    if "clientid" in response:
+                        clientid = response["clientid"]
+                        registered = True
+                    else:
+                        print "No clientid recieved. Weird, trying again..."
+                else:
+        except ValueError:
+            print "Received unreadable message from the server :("
+    return clientid
+
+def disconnect(sock, clientid):
+    goodbyeMsg = json.dumps(
+        {
+            'client': clientid,
+            'action': 'disconnect'
+        })
+    sock.send(goodbyeMsg)
+    sock.close()
 
 # Plays 1 game of rock paper scissors
 def playGame(sock, clientid):
@@ -21,7 +52,9 @@ def playGame(sock, clientid):
 
 if __name__ == "__main__":
     # Function to connect and authenticate with the server
-    sock, clientid = connect('localhost', 22066)
+    sock = connect('localhost', 22066)
+
+    clientid = register(sock)
 
     # Play until the user doesn't want to anymore
     donePlaying = False
