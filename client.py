@@ -69,8 +69,8 @@ def playGame(sock, clientid):
     return True
 
 if __name__ == "__main__":
-    logformat = "[%(asctime)s] [%(levelname)s] %(message)s"
     # First, configure the logger to dump to client.log
+    logformat = "[%(asctime)s][%(levelname)s] %(message)s"
     logging.basicConfig(filename="client.log", level=logging.DEBUG, format=logformat)
     # Function to connect and authenticate with the server
     sock = connect('localhost', 22066)
