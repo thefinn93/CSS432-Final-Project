@@ -83,4 +83,4 @@ if __name__ == "__main__":
         donePlaying = playGame(sock, clientid)
 
     # Close the socket (maybe we should say goodbye?)
-    sock.close()
+    disconnect(sock, clientid)
