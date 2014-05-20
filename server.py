@@ -1,15 +1,20 @@
 #!/usr/bin/env python
 import SocketServer
 import json
+import threading
 import logging
 
 class RPSServerHandler(SocketServer.BaseRequestHandler):
 
 
     def handle(self):
-        self.logInfo = {"clientIP": self.client_address[0], "clientName": "-"}
+        self.logInfo = {
+          "clientIP": self.client_address[0],
+          "clientName": "-",
+          "threadName": threading.current_thread().name
+          }
         self.currentGame = None
-        self.clientId = None
+        self.clientID = None
         logging.info("new connection!", extra=self.logInfo)
 
         disconnectRequest = False
@@ -24,9 +29,11 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
                     elif message['action'] == "disconnect":
                         disconnectRequest = True
                         logging.info("Got disconnect request", extra=self.logInfo)
-                    elif self.clientId is not None:
-                        if message['action'] == "challange":
-                            challange(message)
+                    elif self.clientID != None:
+                        if message['action'] == "list":
+                            self.list(message)
+                        elif message['action'] == "challange":
+                            self.challange(message)
                         else:
                             logging.warning("Received request for unrecognized action %s",
                               message['action'],
@@ -62,7 +69,7 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
     def finish(self):
         logging.info("Disconnecting...", extra=self.logInfo)
         try:
-            clients.pop(self.clientid)
+            clients.pop(self.clientID)
         except AttributeError:
             pass
 
@@ -72,14 +79,15 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
             if len(message['name']) < 21:
                 if not message['name'] in clients:
                     self.logInfo['clientName'] = message['name']
-                    self.clientid = message['name']
+                    self.clientID = message['name']
                     logging.info("Name is valid! Registration succssful", extra=self.logInfo)
-                    clients[self.clientid] = {}
-                    clients[self.clientid]['status'] = 0
+                    clients[self.clientID] = {}
+                    clients[self.clientID]['inGame'] = False
+                    clients[self.clientID]['name'] = message['name']
                     logging.debug("Informing client registration was successful", extra=self.logInfo)
                     self.request.sendall(json.dumps({
                       "result": "success",
-                      "clientid": self.clientid
+                      "clientid": self.clientID
                     }))
                 else:
                     logging.info("Tried to take an in use name", extra=self.logInfo)
@@ -99,6 +107,7 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
               "result": "error",
               "excuse": "Please specify a name"
             }))
+
     def challange(self, message):
         logging.warning("Shit shit I don't know how to do this thing!",
           extra=self.logInfo)
@@ -107,16 +116,41 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
           "excuse": "Shit shit I don't know how to do this thing!"
         }))
 
+    def list(self, message):
+        """Lists all available opponents"""
+        list = []
+        for client in clients:
+            # Don't list ourselves
+            if client != self.clientID:
+                entry = {}
+                entry['name'] = clients[client]['name']
+                entry['id'] = client
+                entry['score'] = 9999
+                list.append(entry)
+        logging.debug("Sending list of %i clients", len(list), extra=self.logInfo)
+        self.request.sendall(json.dumps({
+          "result": "success",
+          "list": list
+        }))
 
+class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
+    pass
 
 
 if __name__ == "__main__":
-    logformat = "[%(asctime)s][%(levelname)s][%(clientIP)s][%(clientName)s] %(message)s"
+    logformat = "[%(asctime)s][%(levelname)s][%(threadName)s][%(clientIP)s][%(clientName)s] %(message)s"
     # First, configure the logger to dump to server.log
     logging.basicConfig(filename="server.log", level=logging.DEBUG, format=logformat)
     HOST, PORT = "localhost", 22066
     clients = {}
-    server = SocketServer.TCPServer((HOST, PORT), RPSServerHandler)
+    server = ThreadedTCPServer((HOST, PORT), RPSServerHandler)
+
+    # Start a thread with the server -- that thread will then start one
+    # more thread for each request
+    server_thread = threading.Thread(target=server.serve_forever)
+    # Exit the server thread when the main thread terminates
+    server_thread.daemon = True
+    server_thread.start()
 
     # Activate the server; this will keep running until you
     # interrupt the program with Ctrl-C
