@@ -15,7 +15,7 @@ following message to the server:
 
 ```json
 {
-    "action": "register"
+    "action": "register",
     "username": "[username]"
 }
 ```
@@ -31,7 +31,7 @@ message:
 
 ```json
 {
-    "result": "success"
+    "result": "success",
     "clientid": "[id]"
 }
 ````
@@ -44,7 +44,7 @@ following messages:
 
 ````json
 {
-    "result": "error"
+    "result": "error",
     "excuse": "[message]"
 }
 ````
