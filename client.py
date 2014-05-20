@@ -68,7 +68,7 @@ def pickOpponent(sock, clientid):
     response = json.loads(sock.recv(1024))
     if "list" in response:
         print "Name\tID\tScore"
-        for player in list:
+        for player in response['list']:
             print "%s\t%s\t%s" % (player['name'], player['id'], player['score'])
     else:
         print response
