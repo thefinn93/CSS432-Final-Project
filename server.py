@@ -10,8 +10,7 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
     def handle(self):
         self.logInfo = {
           "clientIP": self.client_address[0],
-          "clientName": "-",
-          "threadName": threading.current_thread().name
+          "clientName": "-"
           }
         self.currentGame = None
         self.clientID = None
