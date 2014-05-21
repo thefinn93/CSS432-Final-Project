@@ -89,13 +89,24 @@ if __name__ == "__main__":
     # We don't really need to send this with each packet, do we....
     clientid = register(sock)
 
-    # List all other players
-    pickOpponent(sock, clientid)
-
     # Play until the user doesn't want to anymore
-    donePlaying = False
-    while not donePlaying:
-        donePlaying = playGame(sock, clientid)
+    exit = False
+    while not exit:
+        print """OMG ITS TEH MENUZ!
+        The following options are available:
+
+        l    List other people available to play
+        c    Challanage someone
+        e    Exit"""
+        action = raw_input("What would you like to do? ")
+        if action == "l":
+            pickOpponent(sock, clientid)
+        elif action == "c":
+            playGame(sock, clientid)
+        elif action == "e":
+            exit = True
+        else:
+            print "Dude, not an option. Cmon."
 
     # Close the socket (maybe we should say goodbye?)
     disconnect(sock, clientid)

@@ -6,7 +6,6 @@ import logging
 
 class RPSServerHandler(SocketServer.BaseRequestHandler):
 
-
     def handle(self):
         self.logInfo = {
           "clientIP": self.client_address[0],
