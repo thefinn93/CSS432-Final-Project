@@ -158,4 +158,25 @@ Where `[gameid]` is the unique identifier people can directly challenge via and
 without asking to challenge you.
 
 #### Join Game
-If the server successfully adds you to the game requested
+If the server successfully adds you to the game requested, it will send back the
+following message:
+
+```json
+{
+  "result": "success",
+  "playerid": "[playerid]"
+}
+```
+Where `[playerid]` is the player position you are (ie, player 1).
+
+#### Leave Server
+If the server successfully deletes you from its list, it will send back the
+following message directly prior to closing the socket:
+
+```json
+{
+  "result": "success",
+  "message": "[message]"
+}
+```
+Where `[message]` is the final message the server sends to the client.
