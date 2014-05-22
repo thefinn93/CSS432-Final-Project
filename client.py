@@ -62,7 +62,7 @@ def disconnect(sock, clientid):
     sock.sendall(goodbyeMsg)
     sock.close()
 
-def pickOpponent(sock, clientid):
+def listOpponents(sock, clientid):
     logging.info("Looking for opponents")
     sock.sendall(json.dumps({'action':'list', 'clientid': clientid}))
     response = json.loads(sock.recv(1024))
@@ -96,11 +96,11 @@ if __name__ == "__main__":
         The following options are available:
 
         l    List other people available to play
-        c    Challanage someone
+        c    Challenage someone
         e    Exit"""
         action = raw_input("What would you like to do? ")
         if action == "l":
-            pickOpponent(sock, clientid)
+            listOpponents(sock, clientid)
         elif action == "c":
             playGame(sock, clientid)
         elif action == "e":
