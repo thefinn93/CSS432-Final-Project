@@ -27,8 +27,24 @@ class MainWindow(wx.Frame):
         # Connect the menu bar's events
         wx.EVT_MENU(self, ID_ABOUT, self.OnAbout)
         wx.EVT_MENU(self, ID_EXIT, self.OnExit)
+
+        # Make the sizers
+        self.sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.buttons = {}
+        for i in ["List players", "Play a game", "Exit", "Do the other thing"]:
+            self.buttons[i] = wx.Button(self, -1, i)
+            self.sizer.Add(self.buttons[i], 1, wx.EXPAND)
+
+        self.outerSizer = wx.BoxSizer(wx.VERTICAL)
+        self.outerSizer.Add(self.control, 1, wx.EXPAND)
+        self.outerSizer.Add(self.sizer, 0, wx.EXPAND)
+
+        self.SetSizer(self.outerSizer)
+        self.SetAutoLayout(1)
+        self.outerSizer.Fit(self)
+
         # Show the window
-        self.Show(True)
+        self.Show()
 
     def OnAbout(self, event):
         d = wx.MessageDialog(self, "A shitty game to demonstrate our CRRRRAAAZZZYY networking skillzz",
