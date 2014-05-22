@@ -61,13 +61,9 @@ class MainWindow(wx.Frame):
         self.playerList.InsertColumn(1, "Score")
 
         if "list" in response:
-            print "Name\tID\tScore"
             for player in response['list']:
                 line = self.playerList.InsertStringItem(0, player['name'])
                 self.playerList.SetStringItem(line, 1, str(player['score']))
-                print "%s\t%s\t%s" % (player['name'], player['id'], player['score'])
-        else:
-            print response
 
         # Make the sizers
         self.sizer = wx.BoxSizer(wx.HORIZONTAL)
