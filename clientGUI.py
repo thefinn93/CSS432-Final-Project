@@ -35,7 +35,8 @@ class MainWindow(wx.Frame):
         wx.EVT_MENU(self, ID_EXIT, self.OnExit)
 
         self.SetAutoLayout(1)
-
+        self.sizer = wx.BoxSizer(wx.VERTICAL)
+        self.SetSizer(self.sizer)
         # Show the window
         self.Show()
 
@@ -61,17 +62,16 @@ class MainWindow(wx.Frame):
                 self.playerList.SetStringItem(line, 1, str(player['score']))
 
         # Make the sizers
-        self.sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.buttons = {}
         for i in ["Invite to play", "Exit"]:
             self.buttons[i] = wx.Button(self, -1, i)
-            self.sizer.Add(self.buttons[i], 1, wx.EXPAND)
+            self.buttonSizer.Add(self.buttons[i], 1, wx.EXPAND)
 
-        outerSizer = wx.BoxSizer(wx.VERTICAL)
-        outerSizer.Add(self.playerList, 1, wx.EXPAND)
-        outerSizer.Add(self.sizer, 0, wx.EXPAND)
-        outerSizer.Fit(self)
-        self.SetSizer(outerSizer)
+        self.sizer.Add(self.playerList, 1, wx.EXPAND)
+        self.sizer.Add(self.sizer, 0, wx.EXPAND)
+        self.sizer.Fit(self)
+        self.SetSizer(self.sizer)
 
     # Connect to a host and port
     def connect(self, hostname, port):
@@ -88,16 +88,22 @@ class MainWindow(wx.Frame):
 
 
     # Register with the server (prompt the user for a name and send it)
-    def register(self):
-        sizer = wx.BoxSizer(wx.VERTICAL)
+    def register(self, error=None):
+        self.sizer.DeleteWindows()
         self.registratonTextBox = wx.TextCtrl(self, style=wx.TE_PROCESS_ENTER)
+        if error is not None:
+            errorLabel = wx.StaticText(self, label=error)
+            errorLabel.SetForegroundColour((255,0,0))
+            errorFont = wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.NORMAL, wx.BOLD)
+            errorLabel.SetFont(errorFont)
+            self.sizer.Add(errorLabel)
         label = wx.StaticText(self, label="Please tell the server your name:")
         gobtn = wx.Button(self, -1, "Register")
-        sizer.Add(label, 0)
-        sizer.Add(self.registratonTextBox, 1, wx.EXPAND)
-        sizer.Add(gobtn, 2)
-        sizer.Fit(self)
-        self.SetSizer(sizer)
+        self.sizer.Add(label, 0)
+        self.sizer.Add(self.registratonTextBox, 1, wx.EXPAND)
+        self.sizer.Add(gobtn, 2)
+        self.sizer.Fit(self)
+
         self.Bind(wx.EVT_BUTTON, self.OnRegister, gobtn)
         self.Bind(wx.EVT_TEXT_ENTER, self.OnRegister, self.registratonTextBox)
 
@@ -105,12 +111,12 @@ class MainWindow(wx.Frame):
     def OnRegister(self, event):
         logging.debug("Registering with server...")
         name = self.registratonTextBox.GetLineText(0)
-        logging.debug("Name set to %s", name)
-        print "Registering...."
         logging.info("Registering as %s", name)
         self.sock.send(json.dumps({"action": "register", "name": name}))
         rawresponse = self.sock.recv(1024).strip()
-        logging.info("Received back %s", rawresponse)
+        logging.debug("Received back %s", rawresponse)
+        registrationSuccessful = False
+        errorMsg = None
         try:
             response = json.loads(rawresponse)
             if "result" in response:
@@ -118,65 +124,28 @@ class MainWindow(wx.Frame):
                     logging.info("Successfully registered!")
                     if "clientid" in response:
                         self.clientid = response["clientid"]
-                        registered = True
+                        registrationSuccessful = True
                     else:
-                        print "No clientid recieved. Weird, trying again..."
+                        errorMsg = "No clientid recieved. Weird, trying again..."
                         logging.warning("No client ID received. Trying again.")
                 elif response["result"] == "error":
                     if "excuse" in response:
-                        print "Failed to register: %s" % response['excuse']
+                        errorMsg = "Failed to register: %s" % response['excuse']
                         logging.warning("Failed to register. Excuse: %s", response['excuse'])
                     else:
-                        print "Failed to register (unknown reason)"
+                        errorMsg = "Failed to register (unknown reason)"
                         logging.warning("Failed to register, no excuse given")
                 else:
-                    print "Unrecognized result from server: %s" % response['result']
+                    errorMsg = "Unrecognized result from server: %s" % response['result']
                     logging.warning("Unrecognized result from server: %s", response['result'])
         except ValueError:
             logging.warning("Failed to parse %s", rawresponse)
-            print "Received unreadable message from the server :("
+            errorMsg = "Received unreadable message from the server :("
             print rawresponse
-        self.listPlayers()
-
-    ## Old register function
-    def registerOld(self):
-        registered = False
-        clientid = None
-        while not registered:
-            logging.debug("Registering with server...")
-            name = raw_input("Choose a name: ")
-            logging.debug("Name set to %s", name)
-            print "Registering...."
-            logging.info("Registering as %s", name)
-            self.sock.send(json.dumps({"action": "register", "name": name}))
-            rawresponse = self.sock.recv(1024).strip()
-            logging.info("Received back %s", rawresponse)
-            try:
-                response = json.loads(rawresponse)
-                if "result" in response:
-                    if response["result"] == "success":
-                        logging.info("Successfully registered!")
-                        if "clientid" in response:
-                            clientid = response["clientid"]
-                            registered = True
-                        else:
-                            print "No clientid recieved. Weird, trying again..."
-                            logging.warning("No client ID received. Trying again.")
-                    elif response["result"] == "error":
-                        if "excuse" in response:
-                            print "Failed to register: %s" % response['excuse']
-                            logging.warning("Failed to register. Excuse: %s", response['excuse'])
-                        else:
-                            print "Failed to register (unknown reason)"
-                            logging.warning("Failed to register, no excuse given")
-                    else:
-                        print "Unrecognized result from server: %s" % response['result']
-                        logging.warning("Unrecognized result from server: %s", response['result'])
-            except ValueError:
-                logging.warning("Failed to parse %s", rawresponse)
-                print "Received unreadable message from the server :("
-                print rawresponse
-        return clientid
+        if registrationSuccessful:
+            self.listPlayers()
+        else:
+            self.register(errorMsg)
 
 
     ### Menu Events ###
