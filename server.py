@@ -22,11 +22,15 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
             try:
                 message = json.loads(data)
                 if "action" in message:
+                    #Register client
                     if message['action'] == "register":
                         self.register(message)
+                    #Unregister Client
                     elif message['action'] == "disconnect":
                         disconnectRequest = True
                         logging.info("Got disconnect request", extra=self.logInfo)
+                    #List challengers 
+                    #Breaks the protocol
                     elif self.clientID != None:
                         if message['action'] == "list":
                             self.list(message)
