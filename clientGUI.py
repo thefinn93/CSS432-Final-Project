@@ -161,7 +161,6 @@ class MainWindow(wx.Frame):
     def OnExit(self, event):
         self.Close(True)
 
-app = wx.PySimpleApp()
+app = wx.App(False)
 frame = MainWindow(None, -1, "Rock, Paper, Scissors")
-#frame.Show(1)
 app.MainLoop()
