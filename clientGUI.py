@@ -46,6 +46,7 @@ class MainWindow(wx.Frame):
         #self.listPlayers()
 
     def listPlayers(self):
+        self.sizer.DeleteWindows()
         self.sock.sendall(json.dumps({'action':'list'}))
         response = json.loads(self.sock.recv(1024))
 
@@ -62,23 +63,24 @@ class MainWindow(wx.Frame):
                 self.playerList.SetStringItem(line, 1, str(player['score']))
 
         # Make the sizers
-        self.buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.buttons = {}
+        buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
+        buttons = {}
         for i in ["Invite to play", "Exit"]:
-            self.buttons[i] = wx.Button(self, -1, i)
-            self.buttonSizer.Add(self.buttons[i], 1, wx.EXPAND)
+            buttons[i] = wx.Button(self, -1, i)
+            buttonSizer.Add(buttons[i], 1, wx.EXPAND)
+
+
 
         self.sizer.Add(self.playerList, 1, wx.EXPAND)
-        self.sizer.Add(self.sizer, 0, wx.EXPAND)
+        self.sizer.Add(buttonSizer, 0, wx.EXPAND)
         self.sizer.Fit(self)
-        self.SetSizer(self.sizer)
 
     # Connect to a host and port
     def connect(self, hostname, port):
         # Eventually, we should loop through all results and use the first one that
         # works, but for now
         server = socket.getaddrinfo(hostname, port)[0]
-        logging.debug("Conectiong to %s:%d", server[4][0], server[4][1])
+        logging.debug("Connecting to %s:%d", server[4][0], server[4][1])
 
         # server[0] will have the socket family (ie INET or INET6)
         self.sock = socket.socket(server[0], socket.SOCK_STREAM)
