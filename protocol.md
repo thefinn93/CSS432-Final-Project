@@ -180,3 +180,24 @@ following message directly prior to closing the socket:
 }
 ```
 Where `[message]` is the final message the server sends to the client.
+
+## Game Handling
+The way the server handles games is via an array of 'game' dictionaries. Below is
+the json equivalent of the dictionary key pairs.
+
+```json
+{
+  "gameID": "[idnum]",
+  "state": "[open,closed,results]",
+  "playerOne": "[username1]",
+  "throwOne": "[rock,paper,scissors]",
+  "playerTwo": "[username2]",
+  "throwTwo": "[rock,paper,scissors]",
+  "winner": "[username]"
+}
+```
+`[idnum]` is the game's unique id; the `state` is one of the three listed values
+that allows the server to determine what to do with that game; both `[username1]`
+and `[username2]` are the client provided usernames of player one and player two
+respectively; `throwOne` and `throwTwo` are the throws of player one and player
+two respectively; finally `winner` holds the `[username]` of the winning player.
