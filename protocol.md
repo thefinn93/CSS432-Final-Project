@@ -188,7 +188,7 @@ the json equivalent of the dictionary key pairs.
 ```json
 {
   "gameID": "[idnum]",
-  "state": "[open,closed,results]",
+  "state": "[empty,open,closed,results]",
   "playerOne": "[username1]",
   "throwOne": "[rock,paper,scissors]",
   "playerTwo": "[username2]",
@@ -196,7 +196,7 @@ the json equivalent of the dictionary key pairs.
   "winner": "[username]"
 }
 ```
-`[idnum]` is the game's unique id; the `state` is one of the three listed values
+`[idnum]` is the game's unique id; the `state` is one of the four listed values
 that allows the server to determine what to do with that game; both `[username1]`
 and `[username2]` are the client provided usernames of player one and player two
 respectively; `throwOne` and `throwTwo` are the throws of player one and player
