@@ -3,7 +3,7 @@ import SocketServer
 import json
 import threading
 import logging
-from enum import Enum
+# import enum
 
 class RPSServerHandler(SocketServer.BaseRequestHandler):
 
@@ -139,12 +139,13 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     pass
 
-#enum for throw types
-class GThrow(Enum):
-    blank = 0
-    rock = 1
-    paper = 2
-    scissors = 3
+# enum for throw types
+# from enum import Enum
+# class GThrow(Enum):
+#    blank = 0
+#    rock = 1
+#    paper = 2
+#    scissors = 3
 
 if __name__ == "__main__":
     logformat = "[%(asctime)s][%(levelname)s][%(threadName)s][%(clientIP)s][%(clientName)s] %(message)s"
@@ -152,11 +153,12 @@ if __name__ == "__main__":
     logging.basicConfig(filename="server.log", level=logging.DEBUG, format=logformat)
     HOST, PORT = "localhost", 22066
     clients = {}
-
-    #Pool of game objects to use
+    # Define rps throws
+    GThrow = {'blank': 0, 'rock': 1, 'paper': 2, 'scissors': 3}
+    # Pool of game objects to use
     RPSgames = []
     for k in range(20):
-      RPSgames.append({'gameID': k,'state':'empty','playerOne':'empty','throwOne':GThrow.blank,'playerTwo':'empty','throwTwo':GThrow.blank,'winner':'empty'})
+      RPSgames.append({'gameID': k,'state':'empty','playerOne':'empty','throwOne':GThrow['blank'],'playerTwo':'empty','throwTwo':GThrow['blank'],'winner':'empty'})
     server = ThreadedTCPServer((HOST, PORT), RPSServerHandler)
 
     # Start a thread with the server -- that thread will then start one
