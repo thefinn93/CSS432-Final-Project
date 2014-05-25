@@ -188,7 +188,7 @@ the json equivalent of the dictionary key pairs.
 ```json
 {
   "gameID": "[idnum]",
-  "state": "[empty,open,closed,results]",
+  "state": "[empty,open,closed,playing,results]",
   "playerOne": "[username1]",
   "throwOne": "[rock,paper,scissors]",
   "playerTwo": "[username2]",
