@@ -36,6 +36,8 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
                     elif self.clientID != None:
                         if message['action'] == "list":
                             self.list(message)
+                        elif message['action'] == "glist":
+                            self.listGames(message)
                         elif message['action'] == "challange":
                             self.challange(message)
                         elif message['action'] == "create":
@@ -92,6 +94,7 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
                     clients[self.clientID] = {}
                     clients[self.clientID]['inGame'] = False
                     clients[self.clientID]['name'] = message['name']
+                    clients[self.clientID]['score'] = 0;
                     logging.debug("Informing client registration was successful", extra=self.logInfo)
                     self.request.sendall(json.dumps({
                       "result": "success",
@@ -124,6 +127,7 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
           "excuse": "Shit shit I don't know how to do this thing!"
         }))
 
+    # Note: for some reason it sends the json in reverse order, not sure why
     def list(self, message):
         """Lists all available opponents"""
         list = []
@@ -141,12 +145,29 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
           "list": list
         }))
 
+    # Mainly a dev function, prints out the list of all game slots
+    # Note: for some reason it sends the json in reverse order, not sure why
+    def listGames(self, message):
+        """Lists all available game"""
+        list = []
+        for game in RPSgames:
+            entry = {}
+            entry['gameid'] = game['gameID']
+            entry['state'] = game['state']
+            entry['playerOne'] = game['playerOne']
+            entry['playerTwo'] = game['playerTwo']
+            list.append(entry)
+        self.request.sendall(json.dumps({
+          "result": "success",
+          "list": list
+        }))
+
     # needs logging info
     def create(self,message):
         noOtherGames = True
         foundGameSlot = False
         # Check if the user has aleady opened a game
-        for game in PRSgames:
+        for game in RPSgames:
             if game['playerOne'] == self.clientID:
               noOtherGame = False
 
@@ -154,23 +175,31 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
             # Check for an empty game slot
             for game in RPSgames:
                 # If there is, put player creating creating as p1
-                if game['state'] == "empty":
+                if game['state'] == gameStates['empty']:
                     game['state'] = gameStates['open']
                     game['playerOne'] = self.clientID
-                    logging.debug("Sending creation confirmation...")
+                    # logging.debug("Sending creation confirmation...")
                     self.request.sendall(json.dumps({
                     "result": "success",
                     "gameid": game['gameID']
                     }))
                     foundGameSlot = True
+                    break
+                # else:
+                #    print "Game %s is currently %s..." % (game['gameID'], game['state'])
 
             if not foundGameSlot:
-                logging.debug("failed to create a game at this time...")
+                # logging.debug("failed to create a game at this time...")
                 self.request.sendall(json.dumps({
                 "result": "error",
                 "excuse": "the straw that broke the camel's back..."
                 }))
-
+        else:
+            self.request.sendall(json.dumps({
+            "result": "error",
+            "excuse": "You can't have two games!"
+            }))
+            print "You can't have two games!"
 
     def join(self,message):
 
@@ -277,7 +306,7 @@ if __name__ == "__main__":
 
     # Pool of game objects to use
     RPSgames = []
-    for k in range(20):
+    for k in range(5):
       RPSgames.append({
       "gameID": k,
       "state": gameStates["empty"],

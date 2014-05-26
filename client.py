@@ -65,11 +65,29 @@ def disconnect(sock, clientid):
 def listOpponents(sock, clientid):
     logging.info("Looking for opponents")
     sock.sendall(json.dumps({'action':'list', 'clientid': clientid}))
-    response = json.loads(sock.recv(1024))
+    rawresponse = sock.recv(1024).strip()
+    logging.info("Received back %s", rawresponse)
+    response = json.loads(rawresponse)
+    logging.debug("Successfully Parsed response")
     if "list" in response:
         print "Name\tID\tScore"
         for player in response['list']:
             print "%s\t%s\t%s" % (player['name'], player['id'], player['score'])
+    else:
+        print response
+
+def listGames(sock, clientid):
+    logging.info("Looking for games")
+    sock.sendall(json.dumps({'action':'glist'}))
+    logging.info("Sent request")
+    rawresponse = sock.recv(1024).strip()
+    logging.info("Received back %s", rawresponse)
+    response = json.loads(rawresponse)
+    logging.debug("Successfully Parsed response")
+    if "list" in response:
+        print "Game ID\tState\tPlayer One\tPlayer Two"
+        for game in response['list']:
+            print "%s\t%s\t%s\t%s" % (game['gameid'], game['state'], game['playerOne'], game['playerTwo'])
     else:
         print response
 
@@ -78,6 +96,27 @@ def playGame(sock, clientid):
     logging.warning("Attempting to play game I don't know how to play!")
     print "Sorry, I don't know how to play :("
     return True
+
+# The function used to request a game be created
+def createGame(sock, clientid):
+    gameid = 0;
+    logging.info("Let's build it!")
+    sock.sendall(json.dumps({
+      "action": "create",
+      "clientid": clientid
+    }))
+    print "Please wait..."
+    response = json.loads(sock.recv(1024).strip())
+    if "result" in response:
+        if response['result'] == "success":
+            gameid = response["gameid"]
+            print gameid
+        else:
+            print "Please try again later..."
+            print response['excuse']
+
+def joinGame(sock, clientid):
+    print "I wanna play too!"
 
 if __name__ == "__main__":
     # First, configure the logger to dump to client.log
@@ -97,12 +136,20 @@ if __name__ == "__main__":
 
         l    List other people available to play
         c    Challenage someone
+        n    Create a new game
+        j    Join an existing game
         e    Exit"""
         action = raw_input("What would you like to do? ")
         if action == "l":
             listOpponents(sock, clientid)
         elif action == "c":
             playGame(sock, clientid)
+        elif action == "n":
+            createGame(sock, clientid)
+        elif action == "j":
+            joinGame(sock, clientid)
+        elif action == "lg":
+            listGames(sock, clientid)
         elif action == "e":
             exit = True
         else:
