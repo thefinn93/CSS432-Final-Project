@@ -5,6 +5,7 @@ import threading
 import logging
 # import enum
 
+# Server Thread
 class RPSServerHandler(SocketServer.BaseRequestHandler):
 
     def handle(self):
@@ -181,6 +182,68 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     pass
 
+# Game Master Thread
+class gameMaster(threading.Thread):
+    def __init__(self,threadID,gamePool):
+        threading.Thread.__init__(self)
+        self.threadID = threadID
+        self.gamePool = gamePool
+
+    def run(self):
+      print "Lets play!"
+
+# Run a game
+def runRPSGame(gameID, gamePool):
+    gamePool[gameID]['state'] = gameStates['playing']
+    isWinner = False
+    # Have players play until a winner
+    while not isWinner:
+        # Request throw from player one
+        # Request throw from player two
+        # Determine winner
+        if gamePool[gameID]['throwOne'] == gameThrow['rock']:
+            if gamePool[gameID]['throwTwo'] == gameThrow['rock']:
+                print "Tie on rock!"
+
+            elif gamePool[gameID]['throwTwo'] == gameThrow['paper']:
+                print "Player two is the winner!"
+                gamePool[gameID]['winner'] = gamePool[gameID]['playerTwo']
+                isWinner = True
+
+            elif gamePool[gameID]['throwTwo'] == gameThrow['scissors']:
+                print "Player one is the winner!"
+                gamePool[gameID]['winner'] = gamePool[gameID]['playerOne']
+                isWinner = True
+
+        elif gamePool[gameID]['throwOne'] == gameThrow['paper']:
+            if gamePool[gameID]['throwTwo'] == gameThrow['rock']:
+                print "Player one is the winner!"
+                gamePool[gameID]['winner'] = gamePool[gameID]['playerOne']
+                isWinner = True
+
+            elif gamePool[gameID]['throwTwo'] == gameThrow['paper']:
+                print "Tie on paper!"
+
+            elif gamePool[gameID]['throwTwo'] == gameThrow['scissors']:
+                print "Player two is the winner"
+                gamePool[gameID]['winner'] = gamePool[gameID]['playerTwo']
+                isWinner = True
+
+        elif gamePool[gameID]['throwOne'] == gameThrow['scissors']:
+            if gamePool[gameID]['throwTwo'] == gameThrow['rock']:
+                print "Player two is the winner!"
+                gamePool[gameID]['winner'] = gamePool[gameID]['playerTwo']
+                isWinner = True
+
+            elif gamePool[gameID]['throwTwo'] == gameThrow['paper']:
+                print "Player one is the winner!"
+                gamePool[gameID]['winner'] = gamePool[gameID]['playerOne']
+                isWinner = True
+
+            elif gamePool[gameID]['throwTwo'] == gameThrow['scissors']:
+                print "Tie on scissors!"
+
+    gamePool[gameID]['state'] = gameStates['results']
 # enum for throw types
 # from enum import Enum
 # class GThrow(Enum):
