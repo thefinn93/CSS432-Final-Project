@@ -137,7 +137,7 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
                 entry = {}
                 entry['name'] = clients[client]['name']
                 entry['id'] = client
-                entry['score'] = 9999
+                entry['score'] = clients[client]['score']
                 list.append(entry)
         logging.debug("Sending list of %i clients", len(list), extra=self.logInfo)
         self.request.sendall(json.dumps({
