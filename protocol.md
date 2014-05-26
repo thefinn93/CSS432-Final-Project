@@ -201,3 +201,26 @@ that allows the server to determine what to do with that game; both `[username1]
 and `[username2]` are the client provided usernames of player one and player two
 respectively; `throwOne` and `throwTwo` are the throws of player one and player
 two respectively; finally `winner` holds the `[username]` of the winning player.
+
+### Throwing
+In the game (rock, paper, scissors), the term throw is used to describe the
+action each player makes. For example, player one throws rock and player two
+throws paper, therefore making player two the winner.
+
+The server will send a request to the client requesting a throw:
+
+```json
+{
+  "request": "throw"
+}
+```
+
+The client should then respond with the following:
+
+```json
+{
+  "action": "throw",
+  "type": "[rock,paper,scissors]"
+}
+```
+Where the `"type"` is one of the three listed values.
