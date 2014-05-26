@@ -166,7 +166,7 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
             if not foundGameSlot:
                 logging.debug("failed to create a game at this time...")
                 self.request.sendall(json.dumps({
-                "result": "error"
+                "result": "error",
                 "excuse": "the straw that broke the camel's back..."
                 }))
 
@@ -176,7 +176,7 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
         print "Count me in!"
         if "gameid" in message:
           RPSgames[message['gameid']]['state'] = gameStates['closed']
-            RPSgames[message['gameid']]['playerTwo'] = self.clientID
+          RPSgames[message['gameid']]['playerTwo'] = self.clientID
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     pass
