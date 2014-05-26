@@ -23,20 +23,24 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
             try:
                 message = json.loads(data)
                 if "action" in message:
-                    #Register client
+                    # Register client
                     if message['action'] == "register":
                         self.register(message)
-                    #Unregister Client
+                    # Unregister Client
                     elif message['action'] == "disconnect":
                         disconnectRequest = True
                         logging.info("Got disconnect request", extra=self.logInfo)
-                    #List challengers
-                    #Breaks the protocol
+                    # List challengers
+                    # Breaks the protocol
                     elif self.clientID != None:
                         if message['action'] == "list":
                             self.list(message)
                         elif message['action'] == "challange":
                             self.challange(message)
+                        elif message['action'] == "create":
+                            self.create(message)
+                        elif message['action'] == "join":
+                            self.join(message)
                         else:
                             logging.warning("Received request for unrecognized action %s",
                               message['action'],
@@ -136,6 +140,44 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
           "list": list
         }))
 
+    # needs logging info
+    def create(self,message):
+        noOtherGames = True
+        foundGameSlot = False
+        # Check if the user has aleady opened a game
+        for game in PRSgames:
+            if game['playerOne'] == self.clientID:
+              noOtherGame = False
+
+        if noOtherGames:
+            # Check for an empty game slot
+            for game in RPSgames:
+                # If there is, put player creating creating as p1
+                if game['state'] == "empty":
+                    game['state'] = gameStates['open']
+                    game['playerOne'] = self.clientID
+                    logging.debug("Sending creation confirmation...")
+                    self.request.sendall(json.dumps({
+                    "result": "success",
+                    "gameid": game['gameID']
+                    }))
+                    foundGameSlot = True
+
+            if not foundGameSlot:
+                logging.debug("failed to create a game at this time...")
+                self.request.sendall(json.dumps({
+                "result": "error"
+                "excuse": "the straw that broke the camel's back..."
+                }))
+
+
+    def join(self,message):
+
+        print "Count me in!"
+        if "gameid" in message:
+          RPSgames[message['gameid']]['state'] = gameStates['closed']
+            RPSgames[message['gameid']]['playerTwo'] = self.clientID
+
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     pass
 
@@ -154,11 +196,34 @@ if __name__ == "__main__":
     HOST, PORT = "localhost", 22066
     clients = {}
     # Define rps throws
-    GThrow = {'blank': 0, 'rock': 1, 'paper': 2, 'scissors': 3}
+    gameThrow = {
+      "blank": 0,
+      "rock": 1,
+      "paper": 2,
+      "scissors": 3
+      }
+
+    # Dictionary of game states
+    gameStates = {
+      "empty": 0,
+      "open": 1,
+      "closed": 2,
+      "playing": 3,
+      "results": 4
+    }
+
     # Pool of game objects to use
     RPSgames = []
     for k in range(20):
-      RPSgames.append({'gameID': k,'state':'empty','playerOne':'empty','throwOne':GThrow['blank'],'playerTwo':'empty','throwTwo':GThrow['blank'],'winner':'empty'})
+      RPSgames.append({
+      "gameID": k,
+      "state": gameStates["empty"],
+      "playerOne": "empty",
+      "throwOne":gameThrow["blank"],
+      "playerTwo":"empty",
+      "throwTwo":gameThrow["blank"],
+      "winner":"empty"})
+
     server = ThreadedTCPServer((HOST, PORT), RPSServerHandler)
 
     # Start a thread with the server -- that thread will then start one
