@@ -180,21 +180,19 @@ if __name__ == "__main__":
         print """OMG ITS TEH MENUZ!
         The following options are available:
 
-        l    List other people available to play
-        c    Challenage someone
-        n    Create a new game
+        s    Show the scoreboard
+        c    Create a new game
+        l    List games
         j    Join an existing game
         e    Exit"""
         action = raw_input("What would you like to do? ")
-        if action == "l":
+        if action == "s":
             listOpponents(sock, clientid)
         elif action == "c":
-            playGame(sock, clientid)
-        elif action == "n":
             createGame(sock, clientid)
         elif action == "j":
             joinGame(sock, clientid)
-        elif action == "lg":
+        elif action == "l":
             listGames(sock, clientid)
         elif action == "e":
             exit = True
