@@ -239,7 +239,7 @@ def runRPSGame(gameID, gamePool, sock, playerid):
             if not aTie:
               sock.sendall(json.dumps({
               "request": "throw",
-              "reason": "the game has begun"
+              "reason": "the game has begun!"
               }))
             if aTie:
               sock.sendall(json.dumps({
@@ -258,7 +258,7 @@ def runRPSGame(gameID, gamePool, sock, playerid):
             #     gamePool[gameID]['throwOne'] = gameThrow['paper']
             #   elif message['type'] == "scissors":
             #     gamePool[gameID]['throwOne'] = gameThrow['scissors']
-            #   gamePool[gameID]['state'] = gameStates['playing']
+            gamePool[gameID]['state'] = gameStates['playing']
         # Request throw from player two
         elif playerid == 2 and gamePool[gameID]['state'] == gameStates['playing']:
             if not aTie:
@@ -283,7 +283,7 @@ def runRPSGame(gameID, gamePool, sock, playerid):
             #    gamePool[gameID]['throwTwo'] = gameThrow['paper']
             #  elif message['type'] == "scissors":
             #    gamePool[gameID]['throwTwo'] = gameThrow['scissors']
-            #  gamePool[gameID]['state'] = gameStates['results']
+            gamePool[gameID]['state'] = gameStates['results']
 
         # Determine winner
         elif gamePool[gameID]['state'] == gameStates['results']:
