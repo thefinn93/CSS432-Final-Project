@@ -99,7 +99,6 @@ def playGame(sock, clientid):
 
 # The function used to request a game be created
 def createGame(sock, clientid):
-    gameid = 0;
     logging.info("Let's build it!")
     sock.sendall(json.dumps({
       "action": "create",
@@ -114,9 +113,55 @@ def createGame(sock, clientid):
         else:
             print "Please try again later..."
             print response['excuse']
+            return
+    print "Waiting for an opponent..."
+
+    while True:
+        response = json.loads(sock.recv(1024).strip())
+        if "request" in response:
+            if response['request'] == "throw":
+                screenMessage = "1. rock\t2. paper\t3. scissors\nWhat do you throw because %s" % (response['reason'])
+                throw = raw_input(screenMessage)
+                sock.sendall(json.dumps({
+                  "action": "throw",
+                  "type": throw
+                }))
+        if "result" in response:
+          if response['result'] == "finished":
+            print response['message']
+            return
 
 def joinGame(sock, clientid):
     print "I wanna play too!"
+    gameid = raw_input("What is the game id of the game you want to play?")
+    sock.sendall(json.dumps({
+      "action": "join",
+      "gameid": gameid
+    }))
+    print "Request sent...please wait..."
+    if "result" in response:
+        if response['result'] == "success":
+            playerid = response["playerid"]
+            print "Your are %s" % (playerid)
+        else:
+            print "Please try again later..."
+            print response['excuse']
+            return
+
+    while True:
+        response = json.loads(sock.recv(1024).strip())
+        if "request" in response:
+            if response['request'] == "throw":
+                screenMessage = "1. rock\t2. paper\t3. scissors\nWhat do you throw because %s" % (response['reason'])
+                throw = raw_input(screenMessage)
+                sock.sendall(json.dumps({
+                  "action": "throw",
+                  "type": throw
+                }))
+        if "result" in response:
+          if response['result'] == "finished":
+            print response['message']
+            return
 
 if __name__ == "__main__":
     # First, configure the logger to dump to client.log

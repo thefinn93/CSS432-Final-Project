@@ -206,8 +206,12 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
 
         # print "Count me in!"
         if "gameid" in message:
-          RPSgames[message['gameid']]['state'] = gameStates['closed']
           RPSgames[message['gameid']]['playerTwo'] = self.clientID
+          self.request.sendall(json.dumps({
+          "result": "success",
+          "playerid": "playerTwo"
+          }))
+          RPSgames[message['gameid']]['state'] = gameStates['closed']
           runRPSGame(message['gameid'],RPSgames,self.request,2)
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
@@ -234,25 +238,26 @@ def runRPSGame(gameID, gamePool, sock, playerid):
             if not aTie:
               sock.sendall(json.dumps({
               "request": "throw",
-              "reason": "Starting Game"
+              "reason": "the game has begun"
               }))
             if aTie:
               sock.sendall(json.dumps({
               "request": "throw",
-              "reason": "There was a tie!"
+              "reason": "there was a tie!"
               }))
             logging.debug("request sent to player 1")
             data = sock.recv(1024).strip()
             logging.debug("Player 1 sent back %s", data)
             message = json.loads(data)
-            if "throw" in message and "type" in message:
-              if message['type'] == "rock":
-                gamePool[gameID]['throwOne'] = gameThrow['rock']
-              elif message['type'] == "paper":
-                gamePool[gameID]['throwOne'] = gameThrow['paper']
-              elif message['type'] == "scissors":
-                gamePool[gameID]['throwOne'] = gameThrow['scissors']
-              gamePool[gameID]['state'] = gameStates['playing']
+            gamePool[gameID]['throwOne'] = message['type']
+            # if "throw" in message and "type" in message:
+            #   if message['type'] == "rock":
+            #     gamePool[gameID]['throwOne'] = gameThrow['rock']
+            #   elif message['type'] == "paper":
+            #     gamePool[gameID]['throwOne'] = gameThrow['paper']
+            #   elif message['type'] == "scissors":
+            #     gamePool[gameID]['throwOne'] = gameThrow['scissors']
+            #   gamePool[gameID]['state'] = gameStates['playing']
         # Request throw from player two
         elif playerid == 2 and gamePool[gameID]['state'] == gameStates['playing']:
             if not aTie:
@@ -269,14 +274,15 @@ def runRPSGame(gameID, gamePool, sock, playerid):
             data = sock.recv(1024).strip()
             logging.debug("Player 2 sent back %s", data)
             message = json.loads(data)
-            if "throw" in message and "type" in message:
-              if message['type'] == "rock":
-                gamePool[gameID]['throwTwo'] = gameThrow['rock']
-              elif message['type'] == "paper":
-                gamePool[gameID]['throwTwo'] = gameThrow['paper']
-              elif message['type'] == "scissors":
-                gamePool[gameID]['throwTwo'] = gameThrow['scissors']
-              gamePool[gameID]['state'] = gameStates['results']
+            gamePool[gameID]['throwTwo'] = message['type']
+            #if "throw" in message and "type" in message:
+            #  if message['type'] == "rock":
+            #    gamePool[gameID]['throwTwo'] = gameThrow['rock']
+            #  elif message['type'] == "paper":
+            #    gamePool[gameID]['throwTwo'] = gameThrow['paper']
+            #  elif message['type'] == "scissors":
+            #    gamePool[gameID]['throwTwo'] = gameThrow['scissors']
+            #  gamePool[gameID]['state'] = gameStates['results']
 
         # Determine winner
         elif gamePool[gameID]['state'] == gameStates['results']:
@@ -317,6 +323,11 @@ def runRPSGame(gameID, gamePool, sock, playerid):
                     print "Player one is the winner!"
                     gamePool[gameID]['winner'] = gamePool[gameID]['playerOne']
                     isWinner = True
+    # Send response back to client
+    sock.sendall(json.dumps({
+    "result": "finished",
+    "message": "%s was the winner" % gamePool[gameID]['winner']
+    }))
 
 # enum for throw types
 # from enum import Enum
