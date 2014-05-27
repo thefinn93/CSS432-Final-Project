@@ -211,9 +211,12 @@ The server will send a request to the client requesting a throw:
 
 ```json
 {
-  "request": "throw"
+  "request": "throw",
+  "reason": "[message]"
 }
 ```
+Where message states why it needs the throw. This is for determining if its the
+first throw or if there was a tie.
 
 The client should then respond with the following:
 

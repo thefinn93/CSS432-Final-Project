@@ -184,6 +184,7 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
                     "gameid": game['gameID']
                     }))
                     foundGameSlot = True
+                    runRPSGame(game['gameID'],RPSgames,self.request,1)
                     break
                 # else:
                 #    print "Game %s is currently %s..." % (game['gameID'], game['state'])
@@ -203,10 +204,11 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
 
     def join(self,message):
 
-        print "Count me in!"
+        # print "Count me in!"
         if "gameid" in message:
           RPSgames[message['gameid']]['state'] = gameStates['closed']
           RPSgames[message['gameid']]['playerTwo'] = self.clientID
+          runRPSGame(message['gameid'],RPSgames,self.request,2)
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     pass
@@ -222,57 +224,100 @@ class gameMaster(threading.Thread):
       print "Lets play!"
 
 # Run a game
-def runRPSGame(gameID, gamePool):
-    gamePool[gameID]['state'] = gameStates['playing']
+def runRPSGame(gameID, gamePool, sock, playerid):
     isWinner = False
+    aTie = False
     # Have players play until a winner
     while not isWinner:
         # Request throw from player one
+        if playerid == 1 and gamePool[gameID]['state'] == gameStates['closed']:
+            if not aTie:
+              sock.sendall(json.dumps({
+              "request": "throw",
+              "reason": "Starting Game"
+              }))
+            if aTie:
+              sock.sendall(json.dumps({
+              "request": "throw",
+              "reason": "There was a tie!"
+              }))
+            logging.debug("request sent to player 1")
+            data = sock.recv(1024).strip()
+            logging.debug("Player 1 sent back %s", data)
+            message = json.loads(data)
+            if "throw" in message and "type" in message:
+              if message['type'] == "rock":
+                gamePool[gameID]['throwOne'] = gameThrow['rock']
+              elif message['type'] == "paper":
+                gamePool[gameID]['throwOne'] = gameThrow['paper']
+              elif message['type'] == "scissors":
+                gamePool[gameID]['throwOne'] = gameThrow['scissors']
+              gamePool[gameID]['state'] = gameStates['playing']
         # Request throw from player two
+        elif playerid == 2 and gamePool[gameID]['state'] == gameStates['playing']:
+            if not aTie:
+              sock.sendall(json.dumps({
+              "request": "throw",
+              "reason": "Starting Game"
+              }))
+            if aTie:
+              sock.sendall(json.dumps({
+              "request": "throw",
+              "reason": "There was a tie!"
+              }))
+            logging.debug("request sent to player 2")
+            data = sock.recv(1024).strip()
+            logging.debug("Player 2 sent back %s", data)
+            message = json.loads(data)
+            if "throw" in message and "type" in message:
+              if message['type'] == "rock":
+                gamePool[gameID]['throwTwo'] = gameThrow['rock']
+              elif message['type'] == "paper":
+                gamePool[gameID]['throwTwo'] = gameThrow['paper']
+              elif message['type'] == "scissors":
+                gamePool[gameID]['throwTwo'] = gameThrow['scissors']
+              gamePool[gameID]['state'] = gameStates['results']
+
         # Determine winner
-        if gamePool[gameID]['throwOne'] == gameThrow['rock']:
-            if gamePool[gameID]['throwTwo'] == gameThrow['rock']:
-                print "Tie on rock!"
+        elif gamePool[gameID]['state'] == gameStates['results']:
+            if gamePool[gameID]['throwOne'] == gamePool[gameID]['throwTwo']:
+                print "Tie!"
+                gamePool[gameID]['state'] = gameStates['closed']
+                aTie = True
 
-            elif gamePool[gameID]['throwTwo'] == gameThrow['paper']:
-                print "Player two is the winner!"
-                gamePool[gameID]['winner'] = gamePool[gameID]['playerTwo']
-                isWinner = True
+            elif gamePool[gameID]['throwOne'] == gameThrow['rock']:
+                if gamePool[gameID]['throwTwo'] == gameThrow['paper']:
+                    print "Player two is the winner!"
+                    gamePool[gameID]['winner'] = gamePool[gameID]['playerTwo']
+                    isWinner = True
 
-            elif gamePool[gameID]['throwTwo'] == gameThrow['scissors']:
-                print "Player one is the winner!"
-                gamePool[gameID]['winner'] = gamePool[gameID]['playerOne']
-                isWinner = True
+                elif gamePool[gameID]['throwTwo'] == gameThrow['scissors']:
+                    print "Player one is the winner!"
+                    gamePool[gameID]['winner'] = gamePool[gameID]['playerOne']
+                    isWinner = True
 
-        elif gamePool[gameID]['throwOne'] == gameThrow['paper']:
-            if gamePool[gameID]['throwTwo'] == gameThrow['rock']:
-                print "Player one is the winner!"
-                gamePool[gameID]['winner'] = gamePool[gameID]['playerOne']
-                isWinner = True
+            elif gamePool[gameID]['throwOne'] == gameThrow['paper']:
+                if gamePool[gameID]['throwTwo'] == gameThrow['rock']:
+                    print "Player one is the winner!"
+                    gamePool[gameID]['winner'] = gamePool[gameID]['playerOne']
+                    isWinner = True
 
-            elif gamePool[gameID]['throwTwo'] == gameThrow['paper']:
-                print "Tie on paper!"
+                elif gamePool[gameID]['throwTwo'] == gameThrow['scissors']:
+                    print "Player two is the winner"
+                    gamePool[gameID]['winner'] = gamePool[gameID]['playerTwo']
+                    isWinner = True
 
-            elif gamePool[gameID]['throwTwo'] == gameThrow['scissors']:
-                print "Player two is the winner"
-                gamePool[gameID]['winner'] = gamePool[gameID]['playerTwo']
-                isWinner = True
+            elif gamePool[gameID]['throwOne'] == gameThrow['scissors']:
+                if gamePool[gameID]['throwTwo'] == gameThrow['rock']:
+                    print "Player two is the winner!"
+                    gamePool[gameID]['winner'] = gamePool[gameID]['playerTwo']
+                    isWinner = True
 
-        elif gamePool[gameID]['throwOne'] == gameThrow['scissors']:
-            if gamePool[gameID]['throwTwo'] == gameThrow['rock']:
-                print "Player two is the winner!"
-                gamePool[gameID]['winner'] = gamePool[gameID]['playerTwo']
-                isWinner = True
+                elif gamePool[gameID]['throwTwo'] == gameThrow['paper']:
+                    print "Player one is the winner!"
+                    gamePool[gameID]['winner'] = gamePool[gameID]['playerOne']
+                    isWinner = True
 
-            elif gamePool[gameID]['throwTwo'] == gameThrow['paper']:
-                print "Player one is the winner!"
-                gamePool[gameID]['winner'] = gamePool[gameID]['playerOne']
-                isWinner = True
-
-            elif gamePool[gameID]['throwTwo'] == gameThrow['scissors']:
-                print "Tie on scissors!"
-
-    gamePool[gameID]['state'] = gameStates['results']
 # enum for throw types
 # from enum import Enum
 # class GThrow(Enum):
@@ -280,6 +325,22 @@ def runRPSGame(gameID, gamePool):
 #    rock = 1
 #    paper = 2
 #    scissors = 3
+# Dictionary of game states
+gameStates = {
+  "empty": 0,
+  "open": 1,
+  "closed": 2,
+  "playing": 3,
+  "results": 4
+}
+
+# Define rps throws
+gameThrow = {
+  "blank": 0,
+  "rock": 1,
+  "paper": 2,
+  "scissors": 3
+}
 
 if __name__ == "__main__":
     logformat = "[%(asctime)s][%(levelname)s][%(threadName)s][%(clientIP)s][%(clientName)s] %(message)s"
@@ -287,22 +348,6 @@ if __name__ == "__main__":
     logging.basicConfig(filename="server.log", level=logging.DEBUG, format=logformat)
     HOST, PORT = "localhost", 22066
     clients = {}
-    # Define rps throws
-    gameThrow = {
-      "blank": 0,
-      "rock": 1,
-      "paper": 2,
-      "scissors": 3
-      }
-
-    # Dictionary of game states
-    gameStates = {
-      "empty": 0,
-      "open": 1,
-      "closed": 2,
-      "playing": 3,
-      "results": 4
-    }
 
     # Pool of game objects to use
     RPSgames = []
