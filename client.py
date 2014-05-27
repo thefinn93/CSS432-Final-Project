@@ -59,12 +59,12 @@ def register(sock):
 def disconnect(sock, clientid):
     logging.info("Sending disconnect message and closing socket")
     goodbyeMsg = json.dumps({'client': clientid, 'action': 'disconnect'})
-    sock.sendall(goodbyeMsg)
+    sock.send(goodbyeMsg)
     sock.close()
 
 def listOpponents(sock, clientid):
     logging.info("Looking for opponents")
-    sock.sendall(json.dumps({'action':'list', 'clientid': clientid}))
+    sock.send(json.dumps({'action':'list', 'clientid': clientid}))
     rawresponse = sock.recv(1024).strip()
     logging.info("Received back %s", rawresponse)
     response = json.loads(rawresponse)
@@ -78,7 +78,7 @@ def listOpponents(sock, clientid):
 
 def listGames(sock, clientid):
     logging.info("Looking for games")
-    sock.sendall(json.dumps({'action':'glist'}))
+    sock.send(json.dumps({'action':'glist'}))
     logging.info("Sent request")
     rawresponse = sock.recv(1024).strip()
     logging.info("Received back %s", rawresponse)
@@ -100,7 +100,7 @@ def playGame(sock, clientid):
 # The function used to request a game be created
 def createGame(sock, clientid):
     logging.info("Let's build it!")
-    sock.sendall(json.dumps({
+    sock.send(json.dumps({
       "action": "create",
       "clientid": clientid
     }))
@@ -122,7 +122,7 @@ def createGame(sock, clientid):
             if response['request'] == "throw":
                 screenMessage = "1. rock\t2. paper\t3. scissors\nWhat do you throw because %s\n" % (response['reason'])
                 throw = raw_input(screenMessage)
-                sock.sendall(json.dumps({
+                sock.send(json.dumps({
                   "action": "throw",
                   "type": throw
                 }))
@@ -134,7 +134,7 @@ def createGame(sock, clientid):
 def joinGame(sock, clientid):
     print "I wanna play too!"
     gameid = raw_input("What is the game id of the game you want to play?")
-    sock.sendall(json.dumps({
+    sock.send(json.dumps({
       "action": "join",
       "gameid": gameid
     }))
@@ -155,7 +155,7 @@ def joinGame(sock, clientid):
             if response2['request'] == "throw":
                 screenMessage = "1. rock\t2. paper\t3. scissors\nWhat do you throw because %s" % (response2['reason'])
                 throw = raw_input(screenMessage)
-                sock.sendall(json.dumps({
+                sock.send(json.dumps({
                   "action": "throw",
                   "type": throw
                 }))
