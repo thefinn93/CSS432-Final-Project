@@ -206,13 +206,14 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
 
         # print "Count me in!"
         if "gameid" in message:
-          RPSgames[message['gameid']]['playerTwo'] = self.clientID
+          gameid = int(message['gameid'])
+          RPSgames[gameid]['playerTwo'] = self.clientID
           self.request.sendall(json.dumps({
           "result": "success",
           "playerid": "playerTwo"
           }))
-          RPSgames[message['gameid']]['state'] = gameStates['closed']
-          runRPSGame(message['gameid'],RPSgames,self.request,2)
+          RPSgames[gameid]['state'] = gameStates['closed']
+          runRPSGame(gameid,RPSgames,self.request,2)
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     pass
