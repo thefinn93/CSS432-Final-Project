@@ -120,13 +120,13 @@ def createGame(sock, clientid):
         response = json.loads(sock.recv(1024).strip())
         if "request" in response:
             if response['request'] == "throw":
-                screenMessage = "1. rock\t2. paper\t3. scissors\nWhat do you throw because %s" % (response['reason'])
+                screenMessage = "1. rock\t2. paper\t3. scissors\nWhat do you throw because %s\n" % (response['reason'])
                 throw = raw_input(screenMessage)
                 sock.sendall(json.dumps({
                   "action": "throw",
                   "type": throw
                 }))
-        if "result" in response:
+        elif "result" in response:
           if response['result'] == "finished":
             print response['message']
             return
@@ -159,7 +159,7 @@ def joinGame(sock, clientid):
                   "action": "throw",
                   "type": throw
                 }))
-        if "result" in response2:
+        elif "result" in response2:
           if response2['result'] == "finished":
             print response2['message']
             return
