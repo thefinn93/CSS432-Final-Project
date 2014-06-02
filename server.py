@@ -39,7 +39,7 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
                         elif message['action'] == "glist":
                             self.listGames()
                         elif message['action'] == "create":
-                            self.create(message)
+                            self.create()
                         elif message['action'] == "join":
                             self.join(message)
                         else:
