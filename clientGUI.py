@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import wx
-import random
 import socket
 import json
 import logging
@@ -15,14 +14,14 @@ class RegistrationSuccessEvent(wx.PyEvent):
     def __init__(self, data):
         """Init Result Event."""
         wx.PyEvent.__init__(self)
-        self.SetEventType(EVT_RESULT_ID)
+        self.SetEventType(wx.EVT_RESULT_ID)
         self.data = data
 
 class RegistrationErrorEvent(wx.PyEvent):
     def __init__(self, data):
         """Init Result Event."""
         wx.PyEvent.__init__(self)
-        self.SetEventType(EVT_RESULT_ID)
+        self.SetEventType(wx.EVT_RESULT_ID)
         self.data = data
 
 class SocketThread(threading.Thread):
