@@ -120,13 +120,13 @@ def createGame(sock, clientid):
         response = json.loads(sock.recv(1024).strip())
         if "request" in response:
             if response['request'] == "throw":
-                screenMessage = "1. rock\t2. paper\t3. scissors\nWhat do you throw because %s" % (response['reason'])
+                screenMessage = "1. rock\t2. paper\t3. scissors\nWhat do you throw because %s\n" % (response['reason'])
                 throw = raw_input(screenMessage)
                 sock.send(json.dumps({
                   "action": "throw",
                   "type": throw
                 }))
-        if "result" in response:
+        elif "result" in response:
           if response['result'] == "finished":
             print response['message']
             return
@@ -159,7 +159,7 @@ def joinGame(sock, clientid):
                   "action": "throw",
                   "type": throw
                 }))
-        if "result" in response2:
+        elif "result" in response2:
           if response2['result'] == "finished":
             print response2['message']
             return
@@ -180,21 +180,19 @@ if __name__ == "__main__":
         print """OMG ITS TEH MENUZ!
         The following options are available:
 
-        l    List other people available to play
-        c    Challenage someone
-        n    Create a new game
+        s    Show the scoreboard
+        c    Create a new game
+        l    List games
         j    Join an existing game
         e    Exit"""
         action = raw_input("What would you like to do? ")
-        if action == "l":
+        if action == "s":
             listOpponents(sock, clientid)
         elif action == "c":
-            playGame(sock, clientid)
-        elif action == "n":
             createGame(sock, clientid)
         elif action == "j":
             joinGame(sock, clientid)
-        elif action == "lg":
+        elif action == "l":
             listGames(sock, clientid)
         elif action == "e":
             exit = True

@@ -185,6 +185,14 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
                     }))
                     foundGameSlot = True
                     runRPSGame(game['gameID'],RPSgames,self.request,1)
+                    if RPSgames[game['gameID']]['winner'] == self.clientID:
+                        clients[self.clientID]['score'] += 1
+                        RPSgames[game['gameID']]['state'] = gameStates["empty"],
+                        RPSgames[game['gameID']]['playerOne'] = "empty",
+                        RPSgames[game['gameID']]['throwOne'] = gameThrow["blank"],
+                        RPSgames[game['gameID']]['playerTwo'] = "empty",
+                        RPSgames[game['gameID']]['throwTwo'] = gameThrow["blank"],
+                        RPSgames[game['gameID']]['winner'] = "empty"
                     break
                 # else:
                 #    print "Game %s is currently %s..." % (game['gameID'], game['state'])
@@ -214,6 +222,14 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
           }))
           RPSgames[gameid]['state'] = gameStates['closed']
           runRPSGame(gameid,RPSgames,self.request,2)
+          if RPSgames[gameid]['winner'] == self.clientID:
+              clients[self.clientID]['score'] += 1
+              RPSgames[gameid]['state'] = gameStates["empty"],
+              RPSgames[gameid]['playerOne'] = "empty",
+              RPSgames[gameid]['throwOne'] = gameThrow["blank"],
+              RPSgames[gameid]['playerTwo'] = "empty",
+              RPSgames[gameid]['throwTwo'] = gameThrow["blank"],
+              RPSgames[gameid]['winner'] = "empty"
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     pass
@@ -250,7 +266,7 @@ def runRPSGame(gameID, gamePool, sock, playerid):
             data = sock.recv(1024).strip()
             logging.debug("Player 1 sent back %s", data)
             message = json.loads(data)
-            gamePool[gameID]['throwOne'] = message['type']
+            gamePool[gameID]['throwOne'] = int(message['type'])
             # if "throw" in message and "type" in message:
             #   if message['type'] == "rock":
             #     gamePool[gameID]['throwOne'] = gameThrow['rock']
@@ -275,7 +291,8 @@ def runRPSGame(gameID, gamePool, sock, playerid):
             data = sock.recv(1024).strip()
             logging.debug("Player 2 sent back %s", data)
             message = json.loads(data)
-            gamePool[gameID]['throwTwo'] = message['type']
+            gamePool[gameID]['throwTwo'] = int(message['type'])
+            print "player two's throw is %s" % message['type']
             #if "throw" in message and "type" in message:
             #  if message['type'] == "rock":
             #    gamePool[gameID]['throwTwo'] = gameThrow['rock']
