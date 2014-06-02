@@ -35,11 +35,9 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
                     # Breaks the protocol
                     elif self.clientID != None:
                         if message['action'] == "list":
-                            self.list(message)
+                            self.listPlayers()
                         elif message['action'] == "glist":
-                            self.listGames(message)
-                        elif message['action'] == "challange":
-                            self.challange(message)
+                            self.listGames()
                         elif message['action'] == "create":
                             self.create(message)
                         elif message['action'] == "join":
@@ -119,18 +117,10 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
               "excuse": "Please specify a name"
             }))
 
-    def challange(self, message):
-        logging.warning("Shit shit I don't know how to do this thing!",
-          extra=self.logInfo)
-        self.request.sendall(json.dumps({
-          "result": "error",
-          "excuse": "Shit shit I don't know how to do this thing!"
-        }))
-
     # Note: for some reason it sends the json in reverse order, not sure why
-    def list(self, message):
+    def listPlayers(self):
         """Lists all available opponents"""
-        list = []
+        playerList = []
         for client in clients:
             # Don't list ourselves
             if client != self.clientID:
@@ -138,38 +128,38 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
                 entry['name'] = clients[client]['name']
                 entry['id'] = client
                 entry['score'] = clients[client]['score']
-                list.append(entry)
-        logging.debug("Sending list of %i clients", len(list), extra=self.logInfo)
+                playerList.append(entry)
+        logging.debug("Sending list of %i clients", len(playerList), extra=self.logInfo)
         self.request.sendall(json.dumps({
           "result": "success",
-          "list": list
+          "list": playerList
         }))
 
     # Mainly a dev function, prints out the list of all game slots
     # Note: for some reason it sends the json in reverse order, not sure why
-    def listGames(self, message):
+    def listGames(self):
         """Lists all available game"""
-        list = []
+        gameList = []
         for game in RPSgames:
             entry = {}
             entry['gameid'] = game['gameID']
             entry['state'] = game['state']
             entry['playerOne'] = game['playerOne']
             entry['playerTwo'] = game['playerTwo']
-            list.append(entry)
+            gameList.append(entry)
         self.request.sendall(json.dumps({
           "result": "success",
-          "list": list
+          "list": gameList
         }))
 
     # needs logging info
-    def create(self,message):
+    def create(self):
         noOtherGames = True
         foundGameSlot = False
         # Check if the user has aleady opened a game
         for game in RPSgames:
             if game['playerOne'] == self.clientID:
-              noOtherGame = False
+              noOtherGames = False
 
         if noOtherGames:
             # Check for an empty game slot
