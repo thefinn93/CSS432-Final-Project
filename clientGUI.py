@@ -18,6 +18,13 @@ class RegistrationSuccessEvent(wx.PyEvent):
         self.SetEventType(EVT_RESULT_ID)
         self.data = data
 
+class RegistrationErrorEvent(wx.PyEvent):
+    def __init__(self, data):
+        """Init Result Event."""
+        wx.PyEvent.__init__(self)
+        self.SetEventType(EVT_RESULT_ID)
+        self.data = data
+
 class SocketThread(threading.Thread):
     """A thread to interact with the socket without blocking the GUI"""
     def __init__(self, notify_window, hostname, port):
@@ -84,7 +91,7 @@ class SocketThread(threading.Thread):
             wx.PostEvent(self.notify_window, RegistrationSuccessEvent)
             self.listPlayers()
         else:
-            self.notify_window.(errorMsg)
+            wx.PostEvent(self.notify_window, RegistrationErrorEvent)
 
     def run(self):
         """Run Worker Thread."""
@@ -127,7 +134,7 @@ class MainWindow(wx.Frame):
         self.socket = SocketThread(self, "127.0.0.1", 22066)
         self.register()
 
-        #self.listPlayers()
+        # self.listPlayers()
 
     def listPlayers(self):
         self.sizer.DeleteWindows()
@@ -190,7 +197,7 @@ class MainWindow(wx.Frame):
         self.socket.register(name)
 
 
-    ### Menu Events ###
+    # Menu Events ###
     # File -> About
     def OnAbout(self, event):
         d = wx.MessageDialog(self, "A shitty game to demonstrate our CRRRRAAAZZZYY networking skillzz",
