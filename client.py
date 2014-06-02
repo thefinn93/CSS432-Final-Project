@@ -76,7 +76,7 @@ def listOpponents(sock, clientid):
     else:
         print response
 
-def listGames(sock, clientid):
+def listGames(sock):
     logging.info("Looking for games")
     sock.send(json.dumps({'action':'glist'}))
     logging.info("Sent request")
@@ -131,7 +131,7 @@ def createGame(sock, clientid):
             print response['message']
             return
 
-def joinGame(sock, clientid):
+def joinGame(sock):
     print "I wanna play too!"
     gameid = raw_input("What is the game id of the game you want to play?")
     sock.send(json.dumps({
@@ -191,9 +191,9 @@ if __name__ == "__main__":
         elif action == "c":
             createGame(sock, clientid)
         elif action == "j":
-            joinGame(sock, clientid)
+            joinGame(sock)
         elif action == "l":
-            listGames(sock, clientid)
+            listGames(sock)
         elif action == "e":
             exit = True
         else:
