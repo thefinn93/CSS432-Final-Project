@@ -133,6 +133,7 @@ def createGame(sock, clientid):
 
 def joinGame(sock):
     print "I wanna play too!"
+    listGames(sock)
     gameid = raw_input("What is the game id of the game you want to play?")
     sock.send(json.dumps({
       "action": "join",
