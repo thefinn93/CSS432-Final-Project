@@ -365,7 +365,7 @@ if __name__ == "__main__":
     logformat = "[%(asctime)s][%(levelname)s][%(threadName)s][%(clientIP)s][%(clientName)s] %(message)s"
     # First, configure the logger to dump to server.log
     logging.basicConfig(filename="server.log", level=logging.DEBUG, format=logformat)
-    HOST, PORT = "localhost", 22066
+    HOST, PORT = "0.0.0.0", 22066
     clients = {}
 
     # Pool of game objects to use
