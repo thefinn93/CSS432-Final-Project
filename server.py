@@ -294,7 +294,17 @@ def runRPSGame(gameID, gamePool, sock, playerid):
 
         # Determine winner
         elif gamePool[gameID]['state'] == gameStates['results']:
-            if gamePool[gameID]['throwOne'] == gamePool[gameID]['throwTwo']:
+            if gamePool[gameID]['throwOne'] == gameThrow['forfeit']:
+                print "%s left..." % gamePool[gameID]['playerOne']
+                gamePool[gameID]['winner'] = gamePool[gameID]['playerTwo']
+                isWinner = True
+
+            elif gamePool[gameID]['throwTwo'] == gameThrow['forfeit']:
+                print "%s left..." % gamePool[gameID]['playerTwo']
+                gamePool[gameID]['winner'] = gamePool[gameID]['playerOne']
+                isWinner = True
+                
+            elif gamePool[gameID]['throwOne'] == gamePool[gameID]['throwTwo']:
                 print "Tie!"
                 gamePool[gameID]['state'] = gameStates['closed']
                 aTie = True
@@ -359,6 +369,7 @@ gameThrow = {
   "rock": 1,
   "paper": 2,
   "scissors": 3
+  "forfeit": 4
 }
 
 if __name__ == "__main__":
