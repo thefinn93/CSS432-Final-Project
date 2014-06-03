@@ -270,12 +270,12 @@ def runRPSGame(gameID, gamePool, sock, playerid):
             if not aTie:
               sock.sendall(json.dumps({
               "request": "throw",
-              "reason": "Starting Game"
+              "reason": "the game has begun!"
               }))
             if aTie:
               sock.sendall(json.dumps({
               "request": "throw",
-              "reason": "There was a tie!"
+              "reason": "there was a tie!"
               }))
             logging.debug("request sent to player 2")
             data = sock.recv(1024).strip()
