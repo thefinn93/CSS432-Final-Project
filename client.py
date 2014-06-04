@@ -2,6 +2,7 @@
 import socket
 import json
 import logging
+import argparse
 
 def connect(hostname, port):
     # Eventually, we should loop through all results and use the first one that
@@ -169,8 +170,14 @@ if __name__ == "__main__":
     # First, configure the logger to dump to client.log
     logformat = "[%(asctime)s][%(levelname)s] %(message)s"
     logging.basicConfig(filename="client.log", level=logging.DEBUG, format=logformat)
+
+    parser = argparse.ArgumentParser(description="A silly rock paper scissors game.")
+    parser.add_argument('--server', '-s', metavar="awesome.rps.com", default="rps.finn.io")
+    parser.add_argument('--port', '-p', type=int, metavar=22066, default=22066)
+    args = parser.parse_args()
+    
     # Function to connect and authenticate with the server
-    sock = connect('localhost', 22066)
+    sock = connect(args.server, args.port)
 
     # We don't really need to send this with each packet, do we....
     clientid = register(sock)
