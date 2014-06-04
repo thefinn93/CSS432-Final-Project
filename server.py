@@ -391,14 +391,14 @@ if __name__ == "__main__":
     # Pool of game objects to use
     RPSgames = []
     for k in range(5):
-      RPSgames.append({
-      "gameID": k,
-      "state": gameStates["empty"],
-      "playerOne": "empty",
-      "throwOne":gameThrow["blank"],
-      "playerTwo":"empty",
-      "throwTwo":gameThrow["blank"],
-      "winner":"empty"})
+        RPSgames.append({
+        "gameID": k,
+        "state": gameStates["empty"],
+        "playerOne": "empty",
+        "throwOne":gameThrow["blank"],
+        "playerTwo":"empty",
+        "throwTwo":gameThrow["blank"],
+        "winner":"empty"})
 
     server = ThreadedTCPServer((HOST, PORT), RPSServerHandler)
 
