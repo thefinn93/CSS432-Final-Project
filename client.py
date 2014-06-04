@@ -91,12 +91,6 @@ def listGames(sock):
     else:
         print response
 
-# Plays 1 game of rock paper scissors
-def playGame(sock, clientid):
-    logging.warning("Attempting to play game I don't know how to play!")
-    print "Sorry, I don't know how to play :("
-    return True
-
 # The function used to request a game be created
 def createGame(sock, clientid):
     logging.info("Let's build it!")
