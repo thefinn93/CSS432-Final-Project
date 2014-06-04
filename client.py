@@ -170,8 +170,8 @@ if __name__ == "__main__":
     clientid = register(sock)
 
     # Play until the user doesn't want to anymore
-    exit = False
-    while not exit:
+    stillPlaying = False
+    while not stillPlaying:
         print """OMG ITS TEH MENUZ!
         The following options are available:
 
@@ -190,7 +190,7 @@ if __name__ == "__main__":
         elif action == "l":
             listGames(sock)
         elif action == "e":
-            exit = True
+            stillPlaying = True
         else:
             print "Dude, not an option. Cmon."
 
