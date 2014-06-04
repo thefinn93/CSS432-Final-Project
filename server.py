@@ -240,6 +240,7 @@ def runRPSGame(gameID, gamePool, sock, playerid):
     aTie = False
     # Have players play until a winner
     while not isWinner:
+      try:
         # Request throw from player one
         if playerid == 1 and gamePool[gameID]['state'] == gameStates['closed']:
             if not aTie:
@@ -291,56 +292,64 @@ def runRPSGame(gameID, gamePool, sock, playerid):
             #  elif message['type'] == "scissors":
             #    gamePool[gameID]['throwTwo'] = gameThrow['scissors']
             gamePool[gameID]['state'] = gameStates['results']
+      except KeyboardInterrupt:
+        if playerid == 1:
+            gamePool[gameID]['throwOne'] = gameThrow['forfeit']
+            gamePool[gameID]['state'] = gameStates['playing']
+
+        elif playerid == 2:
+            gamePool[gameID]['throwTwo'] = gameThrow['forfeit']
+            gamePool[gameID]['state'] = gameStates['results']
 
         # Determine winner
-        elif gamePool[gameID]['state'] == gameStates['results']:
-            if gamePool[gameID]['throwOne'] == gameThrow['forfeit']:
-                print "%s left..." % gamePool[gameID]['playerOne']
-                gamePool[gameID]['winner'] = gamePool[gameID]['playerTwo']
-                isWinner = True
+      if gamePool[gameID]['state'] == gameStates['results']:
+          if gamePool[gameID]['throwOne'] == gameThrow['forfeit']:
+              print "%s left..." % gamePool[gameID]['playerOne']
+              gamePool[gameID]['winner'] = gamePool[gameID]['playerTwo']
+              isWinner = True
 
-            elif gamePool[gameID]['throwTwo'] == gameThrow['forfeit']:
-                print "%s left..." % gamePool[gameID]['playerTwo']
-                gamePool[gameID]['winner'] = gamePool[gameID]['playerOne']
-                isWinner = True
+          elif gamePool[gameID]['throwTwo'] == gameThrow['forfeit']:
+              print "%s left..." % gamePool[gameID]['playerTwo']
+              gamePool[gameID]['winner'] = gamePool[gameID]['playerOne']
+              isWinner = True
 
-            elif gamePool[gameID]['throwOne'] == gamePool[gameID]['throwTwo']:
-                print "Tie!"
-                gamePool[gameID]['state'] = gameStates['closed']
-                aTie = True
+          elif gamePool[gameID]['throwOne'] == gamePool[gameID]['throwTwo']:
+              print "Tie!"
+              gamePool[gameID]['state'] = gameStates['closed']
+              aTie = True
 
-            elif gamePool[gameID]['throwOne'] == gameThrow['rock']:
-                if gamePool[gameID]['throwTwo'] == gameThrow['paper']:
-                    print "Player two is the winner!"
-                    gamePool[gameID]['winner'] = gamePool[gameID]['playerTwo']
-                    isWinner = True
+          elif gamePool[gameID]['throwOne'] == gameThrow['rock']:
+              if gamePool[gameID]['throwTwo'] == gameThrow['paper']:
+                  print "Player two is the winner!"
+                  gamePool[gameID]['winner'] = gamePool[gameID]['playerTwo']
+                  isWinner = True
 
-                elif gamePool[gameID]['throwTwo'] == gameThrow['scissors']:
-                    print "Player one is the winner!"
-                    gamePool[gameID]['winner'] = gamePool[gameID]['playerOne']
-                    isWinner = True
+              elif gamePool[gameID]['throwTwo'] == gameThrow['scissors']:
+                  print "Player one is the winner!"
+                  gamePool[gameID]['winner'] = gamePool[gameID]['playerOne']
+                  isWinner = True
 
-            elif gamePool[gameID]['throwOne'] == gameThrow['paper']:
-                if gamePool[gameID]['throwTwo'] == gameThrow['rock']:
-                    print "Player one is the winner!"
-                    gamePool[gameID]['winner'] = gamePool[gameID]['playerOne']
-                    isWinner = True
+          elif gamePool[gameID]['throwOne'] == gameThrow['paper']:
+              if gamePool[gameID]['throwTwo'] == gameThrow['rock']:
+                  print "Player one is the winner!"
+                  gamePool[gameID]['winner'] = gamePool[gameID]['playerOne']
+                  isWinner = True
 
-                elif gamePool[gameID]['throwTwo'] == gameThrow['scissors']:
-                    print "Player two is the winner"
-                    gamePool[gameID]['winner'] = gamePool[gameID]['playerTwo']
-                    isWinner = True
+              elif gamePool[gameID]['throwTwo'] == gameThrow['scissors']:
+                  print "Player two is the winner"
+                  gamePool[gameID]['winner'] = gamePool[gameID]['playerTwo']
+                  isWinner = True
 
-            elif gamePool[gameID]['throwOne'] == gameThrow['scissors']:
-                if gamePool[gameID]['throwTwo'] == gameThrow['rock']:
-                    print "Player two is the winner!"
-                    gamePool[gameID]['winner'] = gamePool[gameID]['playerTwo']
-                    isWinner = True
+          elif gamePool[gameID]['throwOne'] == gameThrow['scissors']:
+              if gamePool[gameID]['throwTwo'] == gameThrow['rock']:
+                  print "Player two is the winner!"
+                  gamePool[gameID]['winner'] = gamePool[gameID]['playerTwo']
+                  isWinner = True
 
-                elif gamePool[gameID]['throwTwo'] == gameThrow['paper']:
-                    print "Player one is the winner!"
-                    gamePool[gameID]['winner'] = gamePool[gameID]['playerOne']
-                    isWinner = True
+              elif gamePool[gameID]['throwTwo'] == gameThrow['paper']:
+                  print "Player one is the winner!"
+                  gamePool[gameID]['winner'] = gamePool[gameID]['playerOne']
+                  isWinner = True
     # Send response back to client
     sock.sendall(json.dumps({
     "result": "finished",
