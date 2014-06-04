@@ -123,12 +123,12 @@ class RPSServerHandler(SocketServer.BaseRequestHandler):
         playerList = []
         for client in clients:
             # Don't list ourselves
-            if client != self.clientID:
-                entry = {}
-                entry['name'] = clients[client]['name']
-                entry['id'] = client
-                entry['score'] = clients[client]['score']
-                playerList.append(entry)
+            #  if client != self.clientID:
+            entry = {}
+            entry['name'] = clients[client]['name']
+            entry['id'] = client
+            entry['score'] = clients[client]['score']
+            playerList.append(entry)
         logging.debug("Sending list of %i clients", len(playerList), extra=self.logInfo)
         self.request.sendall(json.dumps({
           "result": "success",
