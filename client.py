@@ -92,12 +92,6 @@ def listGames(sock):
     else:
         print response
 
-# Plays 1 game of rock paper scissors
-def playGame(sock, clientid):
-    logging.warning("Attempting to play game I don't know how to play!")
-    print "Sorry, I don't know how to play :("
-    return True
-
 # The function used to request a game be created
 def createGame(sock, clientid):
     logging.info("Let's build it!")
@@ -183,8 +177,8 @@ if __name__ == "__main__":
     clientid = register(sock)
 
     # Play until the user doesn't want to anymore
-    exit = False
-    while not exit:
+    stillPlaying = False
+    while not stillPlaying:
         print """OMG ITS TEH MENUZ!
         The following options are available:
 
@@ -203,7 +197,7 @@ if __name__ == "__main__":
         elif action == "l":
             listGames(sock)
         elif action == "e":
-            exit = True
+            stillPlaying = True
         else:
             print "Dude, not an option. Cmon."
 
